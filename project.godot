@@ -28,6 +28,11 @@ window/stretch/aspect="expand"
 
 project/assembly_name="rhymeFighter"
 
+[global_group]
+
+tts_element=""
+tts_loop=""
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
