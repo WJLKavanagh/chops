@@ -4,6 +4,7 @@ using Vosk;
 using NAudio.Wave;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 public partial class SpeechRecogniser : Control
 {
@@ -14,6 +15,7 @@ public partial class SpeechRecogniser : Control
 		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
 	[Export] public string ModelPath = "res://vosk/vosk-model-en-us-0.22-lgraph";
+	[Export] public bool LogRecognitionResults = true;
 	
 	// the active mic
 	[Export] public int MicDeviceNumber = 0; 
@@ -29,6 +31,7 @@ public partial class SpeechRecogniser : Control
 	private double _beatElapsed;
 	private int _beatNumber;
 	private bool _moveAcceptedThisBeat;
+	private string _lastLoggedPartial = string.Empty;
 	
 	public override void _Ready()
 	{
@@ -48,9 +51,16 @@ public partial class SpeechRecogniser : Control
 		
 		// 2. Initialise Vosk
 		string globalModelPath = ProjectSettings.GlobalizePath(ModelPath);
-		Vosk.Vosk.SetLogLevel(-1);
+		Vosk.Vosk.SetLogLevel(0);
+		GD.Print($"Loading Vosk model from: {globalModelPath}");
 		_model = new Model(globalModelPath);
-		_recognizer = new VoskRecognizer(_model, 16000.0f);
+		GD.Print("Vosk model loaded.");
+		string grammar = JsonSerializer.Serialize(RecognizedTerms.Concat(new[] { "[unk]" }));
+		GD.Print($"Vosk command grammar: {grammar}");
+		_recognizer = new VoskRecognizer(_model, 16000.0f, grammar);
+		_recognizer.SetWords(true);
+		_recognizer.SetPartialWords(true);
+		GD.Print("Vosk recognizer ready at 16000 Hz.");
 		
 		// 3. Initialise NAudio
 		_waveIn = new WaveInEvent();
@@ -121,22 +131,46 @@ public partial class SpeechRecogniser : Control
 			if (doc.RootElement.TryGetProperty(searchKey, out JsonElement textElement))
 			{
 				string spokenText = textElement.GetString() ?? string.Empty;
-				
-				if (_isRecording && !_moveAcceptedThisBeat && !string.IsNullOrEmpty(spokenText))
+
+				if (LogRecognitionResults && (isFinal || spokenText != _lastLoggedPartial))
 				{
-					var matches = RecognizedTermPattern.Matches(spokenText);
-					if (matches.Count > 0)
-					{
-						string matchedTerm = Regex.Replace(matches[0].Value, @"\s+", " ").ToLowerInvariant();
-						_moveAcceptedThisBeat = true;
-						_outputLabel.Text = $"Beat {_beatNumber}: {matchedTerm}";
-					}
+					GD.Print($"Vosk {(isFinal ? "final" : "partial")}: {jsonResult}");
+				}
+
+				_lastLoggedPartial = isFinal ? string.Empty : spokenText;
+
+				if (!_isRecording || string.IsNullOrWhiteSpace(spokenText))
+				{
+					return;
+				}
+
+				var matches = RecognizedTermPattern.Matches(spokenText);
+				if (!isFinal)
+				{
+					_outputLabel.Text = $"Beat {_beatNumber}: hearing {spokenText}...";
+					return;
+				}
+
+				if (matches.Count == 0)
+				{
+					_outputLabel.Text = $"Beat {_beatNumber}: heard \"{spokenText}\" (no listed move)";
+					return;
+				}
+
+				if (!_moveAcceptedThisBeat)
+				{
+					_moveAcceptedThisBeat = true;
+					_outputLabel.Text = $"Beat {_beatNumber}: heard \"{spokenText}\"";
+				}
+				else
+				{
+					_outputLabel.Text = $"Beat {_beatNumber}: heard \"{spokenText}\" (move already used)";
 				}
 			}
 		}
-		catch (Exception)
+		catch (JsonException exception)
 		{
-			// Ignore parse errors on partials
+			GD.PushWarning($"Could not parse Vosk recognition result: {exception.Message}");
 		}
 	}
 
