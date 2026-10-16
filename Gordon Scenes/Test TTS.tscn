@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://dir76hbudsdlc"]
+
+[node name="Start Menu Test" type="Label" unique_id=564342264 groups=["tts_element"]]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="TTSController" type="Node" parent="." unique_id=866523331]
+
+[node name="Timer" type="Timer" parent="TTSController" unique_id=1908974545]
+wait_time = 2.0
+autostart = true
