@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://46o3w7jrjjln"]
+
+[ext_resource type="Script" uid="uid://bp1764ayw1366" path="res://SpeechRecogniser.cs" id="1_gwd2p"]
+
+[sub_resource type="AudioStreamMicrophone" id="AudioStreamMicrophone_vs068"]
+
+[node name="Control" type="Control" unique_id=1415504257]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_gwd2p")
+
+[node name="Button" type="Button" parent="." unique_id=2015753043]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "start/stop recording"
+
+[node name="Label" type="Label" parent="." unique_id=1427467163]
+layout_mode = 0
+offset_top = 31.0
+offset_right = 412.0
+offset_bottom = 154.0
+text = "Waiting..."
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1052517249]
+stream = SubResource("AudioStreamMicrophone_vs068")
+autoplay = true
+bus = &"Record"
