@@ -6,23 +6,31 @@
 
 [node name="Control" type="Control" unique_id=1415504257]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = -32.0
+offset_bottom = -32.0
 script = ExtResource("1_gwd2p")
 
 [node name="Button" type="Button" parent="." unique_id=2015753043]
 layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
-text = "start/stop recording"
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 240.0
+offset_bottom = 80.0
+text = "Start Listening"
 
 [node name="Label" type="Label" parent="." unique_id=1427467163]
 layout_mode = 0
-offset_top = 31.0
-offset_right = 412.0
-offset_bottom = 154.0
-text = "Waiting..."
+offset_left = 32.0
+offset_top = 104.0
+offset_right = 900.0
+offset_bottom = 184.0
+theme_override_font_sizes/font_size = 24
+text = "Status: Ready."
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1052517249]
 stream = SubResource("AudioStreamMicrophone_vs068")
