@@ -1,11 +1,16 @@
 [gd_scene format=3 uid="uid://dir76hbudsdlc"]
 
+[ext_resource type="Script" uid="uid://bj1um7etbsy83" path="res://Gordon Scenes/TTSController.gd" id="1_27qtf"]
+
 [node name="Start Menu Test" type="Label" unique_id=564342264 groups=["tts_element"]]
 offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="TTSController" type="Node" parent="." unique_id=866523331]
+script = ExtResource("1_27qtf")
 
 [node name="Timer" type="Timer" parent="TTSController" unique_id=1908974545]
 wait_time = 2.0
 autostart = true
+
+[node name="Node2D" type="Node2D" parent="." unique_id=999127375]
