@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://qgojlmhd8tx"]
+
+[ext_resource type="Script" uid="uid://b87hx7fco03ti" path="res://scripts/characterSelectScripts/characterSelectionScript.gd" id="1_ofdqn"]
+
+[node name="CharacterSelectScene" type="Node2D" unique_id=353054802]
+script = ExtResource("1_ofdqn")
+leftColour = null
+rightColour = null
+mainColour = null
+movementTime = null
+
+[node name="characterOffScreenL" type="ColorRect" parent="." unique_id=830743383]
+offset_left = -331.99954
+offset_top = -150.00002
+offset_right = -5.999542
+offset_bottom = 346.22656
+scale = Vector2(0.8, 0.8)
+color = Color(0.48960084, 0.78214043, 0.9182856, 1)
+
+[node name="characterOffScreenR" type="ColorRect" parent="." unique_id=668670628]
+offset_left = 1219.9999
+offset_top = -150.0
+offset_right = 1545.9999
+offset_bottom = 346.22656
+scale = Vector2(0.8, 0.8)
+color = Color(0.25575855, 0.8626845, 0.53983194, 1)
+
+[node name="characterR" type="ColorRect" parent="." unique_id=646242057]
+offset_left = 1024.0
+offset_top = 71.0
+offset_right = 1350.0
+offset_bottom = 567.22656
+scale = Vector2(0.8, 0.8)
+color = Color(0.81468505, 0.7615168, 7.70092e-07, 1)
+
+[node name="characterL" type="ColorRect" parent="." unique_id=1099410287]
+offset_left = -130.0
+offset_top = 71.0
+offset_right = 196.0
+offset_bottom = 567.22656
+scale = Vector2(0.8, 0.8)
+color = Color(1, 0.69069636, 0.4787314, 1)
+
+[node name="characterMain" type="ColorRect" parent="." unique_id=1508823860]
+offset_left = 420.0
+offset_top = 63.0
+offset_right = 746.0
+offset_bottom = 559.22656
+color = Color(1, 0.57396686, 0.4979421, 1)
