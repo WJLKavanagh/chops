@@ -31,6 +31,7 @@ var p1_super: int
 var p2_super: int
 var p1_rounds: int = 0
 var p2_rounds: int = 0
+var local_is_p1: bool = true
 
 var p1_move: Move = Move.NONE
 var p2_move: Move = Move.NONE
@@ -61,14 +62,16 @@ func _ready() -> void:
 	start_match()
 
 func start_match() -> void:
-	
+	#Checking who is local player before grabbing everything else
+	local_is_p1 = (multiplayer.get_unique_id() == 1)
 	p1_data = CharacterDB.get_fighter(CharacterDB.selected_p1)
 	p2_data = CharacterDB.get_fighter(CharacterDB.selected_p2)
 	p1_rounds = 0
 	p2_rounds = 0
 	
-	tts.queue_text(p1_data.character_name + " versus " + p2_data.character_name + ".", 1)
-	tts.queue_text("Round start, Fight!")
+	if p1_data and p2_data:
+		TTS_Manager.queue_text("Match Start." + p1_data.character_name + " versus " + p2_data.character_name + ".", 1)
+	TTS_Manager.queue_text("Round start, Fight!")
 	start_round()
 
 func start_round() -> void:
@@ -78,7 +81,7 @@ func start_round() -> void:
 	p2_super = 0
 	
 	if tts.is_speaking:
-		await tts.tts_queue_fnished
+		await tts.tts_queue_finished
 		
 	start_input_phase()
 
@@ -179,8 +182,13 @@ func resolve_turn() -> void:
 	var p1_action_text = p1_data.get_move_text(p1_move)
 	var p2_action_text = p2_data.get_move_text(p2_move)
 	
-	tts.queue_text("You execute " + p1_action_text + ".")
-	tts.queue_text("The enemy " + p2_action_text + ".")
+	#Fix for us making sure this works over the network, hopefully will save William some work tomorrow
+	if local_is_p1:
+		tts.queue_text("You execute " + p1_action_text + ".")
+		tts.queue_text("The enemy " + p2_action_text + ".")
+	else:
+		tts.queue_text("You execute " + p2_action_text + ".")
+		tts.queue_text("The enemy " + p1_action_text + ".")
 	
 	#OLD TTS combat narrative, new narrative I have up above now
 	#if p1_move == Move.NONE:
@@ -192,15 +200,17 @@ func resolve_turn() -> void:
 	
 	var p1_dmg_taken = p1_start_hp - p1_health
 	var p2_dmg_taken = p2_start_hp - p2_health
+	var local_dmg_taken = p1_dmg_taken if local_is_p1 else p2_dmg_taken
+	var enemy_dmg_taken = p2_dmg_taken if local_is_p1 else p1_dmg_taken
 	
-	if p2_dmg_taken > 0:
-		tts.queue_text("You hit the enemy for " + str(p2_dmg_taken) + "damage!")
-	elif p1_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and p2_dmg_taken == 0:
+	if enemy_dmg_taken > 0:
+		tts.queue_text("You hit the enemy for " + str(enemy_dmg_taken) + "damage!")
+	elif p1_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and enemy_dmg_taken == 0:
 			tts.queue_text("Your attack was blocked, oh no.")
 			
-	if p1_dmg_taken > 0:
-			tts.queue_text("You hit the enemy for " + str(p2_dmg_taken) + " Damage!")
-	elif p2_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and p1_dmg_taken == 0:
+	if local_dmg_taken > 0:
+			tts.queue_text("You hit the enemy for " + str(local_dmg_taken) + " Damage!")
+	elif p2_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and local_dmg_taken == 0:
 			tts.queue_text("You blocked, well done.")
 			
 	#Health state announcement
