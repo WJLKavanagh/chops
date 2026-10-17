@@ -376,6 +376,7 @@
 [ext_resource type="Texture2D" uid="uid://c6or58ho8xcbb" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE031.png" id="341_1k3sa"]
 [ext_resource type="Texture2D" uid="uid://caayct2d331vt" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE032.png" id="342_1usl7"]
 [ext_resource type="Texture2D" uid="uid://cuywynrqg0wqm" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE033.png" id="343_ty7vn"]
+[ext_resource type="SpriteFrames" uid="uid://5chjgabs503c" path="res://assets/fighters/gordon/gordon_frames.tres" id="377_qqney"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_viu34"]
 animations = [{
@@ -1561,6 +1562,19 @@ animations = [{
 [node name="Testingmorgan" type="Node2D" unique_id=738873973]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1284139359]
+visible = false
 sprite_frames = SubResource("SpriteFrames_viu34")
 animation = &"ATTACKLOW_MORGAN"
 frame_progress = 0.09911108
+
+[node name="Gordon" type="AnimatedSprite2D" parent="." unique_id=131635468]
+position = Vector2(1288.9999, 459.99997)
+scale = Vector2(5, 5)
+sprite_frames = ExtResource("377_qqney")
+animation = &"attack_high"
+
+[node name="Morgan" type="AnimatedSprite2D" parent="." unique_id=1907089751]
+position = Vector2(895, 330)
+scale = Vector2(5, 5)
+sprite_frames = ExtResource("377_qqney")
+animation = &"attack_high"

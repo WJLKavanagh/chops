@@ -24,6 +24,7 @@ const PLACEHOLDER_COLORS: Array[Color] = [
 	Color(0.39, 0.24, 0.42),
 	Color(0.23, 0.37, 0.31)
 ]
+const VOICE_COMMANDS: PackedStringArray = ["next", "previous", "lock in"]
 
 @export var movementTime: float = 0.5
 
@@ -46,9 +47,16 @@ var mainScale: Vector2
 var nonMainScale: Vector2
 var _announcement_id: int = 0
 var _bark_player: AudioStreamPlayer
+var _awaiting_command: bool = false
+var _locked_in: bool = false
+var _idle_animations: Dictionary = {}
 
 func _ready() -> void:
 	tts_manager.set_listening_enabled(false)
+	if not VoiceManager.PhraseRecognised.is_connected(_on_phrase_recognised):
+		VoiceManager.PhraseRecognised.connect(_on_phrase_recognised)
+	VoiceManager.SetGrammar(VOICE_COMMANDS)
+
 	dockList = [
 		characterDockOffScreenL,
 		characterDockLeft,
@@ -63,12 +71,13 @@ func _ready() -> void:
 	offScreenLPos = characterDockOffScreenL.get_transform()
 	mainScale = mainPos.get_scale()
 	nonMainScale = leftPos.get_scale()
+	_load_idle_animations()
 	_setup_character_panels()
 	_changeImages()
 	_announce_selection()
 
 func _process(_delta: float) -> void:
-	if moving:
+	if moving or _awaiting_command or _locked_in:
 		return
 
 	if Input.is_action_just_pressed("testRight"):
@@ -90,6 +99,12 @@ func _setup_character_panels() -> void:
 		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dock.add_child(portrait)
 
+		var idle_sprite := AnimatedSprite2D.new()
+		idle_sprite.name = "IdleAnimation"
+		idle_sprite.position = dock.size * 0.5
+		idle_sprite.centered = true
+		dock.add_child(idle_sprite)
+
 		var name_label := Label.new()
 		name_label.name = "Name"
 		name_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -103,6 +118,25 @@ func _setup_character_panels() -> void:
 		name_label.add_theme_constant_override("outline_size", 6)
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		dock.add_child(name_label)
+
+func _load_idle_animations() -> void:
+	for character in CHARACTERS:
+		var character_name: String = character["name"].to_lower()
+		var frames_path := "res://assets/fighters/%s/%s_frames.tres" % [character_name, character_name]
+		if not ResourceLoader.exists(frames_path):
+			continue
+
+		var frames := load(frames_path) as SpriteFrames
+		if frames == null:
+			push_error("CharacterSelect: Could not load SpriteFrames at %s." % frames_path)
+			continue
+		if not frames.has_animation("idle"):
+			push_warning("CharacterSelect: No idle animation found in %s." % frames_path)
+			continue
+
+		var looping_frames := frames.duplicate() as SpriteFrames
+		looping_frames.set_animation_loop("idle", true)
+		_idle_animations[character_name] = looping_frames
 
 func _moveAllDocksLeft() -> void:
 	moving = true
@@ -140,8 +174,29 @@ func _changeImages() -> void:
 		var character: Dictionary = CHARACTERS[character_index]
 		var dock := dockList[slot]
 		var portrait := dock.get_node("Portrait") as TextureRect
-		portrait.texture = character["texture"]
-		dock.color = Color.WHITE if portrait.texture != null else PLACEHOLDER_COLORS[character_index % PLACEHOLDER_COLORS.size()]
+		var idle_sprite := dock.get_node("IdleAnimation") as AnimatedSprite2D
+		var character_name: String = character["name"].to_lower()
+		var idle_frames := _idle_animations.get(character_name) as SpriteFrames
+
+		if idle_frames != null:
+			idle_sprite.sprite_frames = idle_frames
+			idle_sprite.animation = "idle"
+			idle_sprite.visible = true
+			portrait.texture = null
+			var first_frame := idle_frames.get_frame_texture("idle", 0)
+			if first_frame != null:
+				var fit_scale := minf(
+					(dock.size.x * 0.72) / first_frame.get_width(),
+					(dock.size.y * 0.72) / first_frame.get_height()
+				)
+				idle_sprite.scale = Vector2.ONE * fit_scale
+			idle_sprite.play("idle")
+		else:
+			idle_sprite.stop()
+			idle_sprite.visible = false
+			portrait.texture = character["texture"]
+
+		dock.color = Color.WHITE if idle_frames != null or portrait.texture != null else PLACEHOLDER_COLORS[character_index % PLACEHOLDER_COLORS.size()]
 		dock.get_node("Name").text = character["name"]
 
 func _resetMove() -> void:
@@ -162,27 +217,73 @@ func _announce_selection() -> void:
 	_announcement_id += 1
 	var current_announcement_id := _announcement_id
 	var character: Dictionary = CHARACTERS[queuePointer]
+	_awaiting_command = false
+	tts_manager.set_listening_enabled(false)
+	VoiceManager.StopListening()
 	if _bark_player != null:
 		_bark_player.stop()
 
 	tts_manager.queue_text(character["name"], 1)
 	await tts_manager.tts_queue_finished
 
-	if current_announcement_id != _announcement_id:
+	if current_announcement_id != _announcement_id or _locked_in:
 		return
 
 	var bark_path := "res://assets/audio/sfx/%s_bark.wav" % character["name"].to_lower()
-	if not ResourceLoader.exists(bark_path):
+	if ResourceLoader.exists(bark_path):
+		var bark := load(bark_path) as AudioStream
+		if bark == null:
+			push_error("CharacterSelect: Could not load bark audio at %s." % bark_path)
+			return
+
+		if _bark_player == null:
+			_bark_player = AudioStreamPlayer.new()
+			_bark_player.volume_db = 10.0
+			add_child(_bark_player)
+		_bark_player.stream = bark
+		_bark_player.play()
+		await _bark_player.finished
+
+	if current_announcement_id != _announcement_id or _locked_in:
 		return
 
-	var bark := load(bark_path) as AudioStream
-	if bark == null:
-		push_error("CharacterSelect: Could not load bark audio at %s." % bark_path)
+	tts_manager.queue_text("Say next, previous, or lock in.", 1)
+	await tts_manager.tts_queue_finished
+
+	if current_announcement_id != _announcement_id or _locked_in:
 		return
 
-	if _bark_player == null:
-		_bark_player = AudioStreamPlayer.new()
-		_bark_player.volume_db = 10.0
-		add_child(_bark_player)
-	_bark_player.stream = bark
-	_bark_player.play()
+	VoiceManager.SetGrammar(VOICE_COMMANDS)
+	_awaiting_command = true
+	tts_manager.set_listening_enabled(true)
+	VoiceManager.StartListening()
+
+func _on_phrase_recognised(phrase: String) -> void:
+	if not _awaiting_command or moving or _locked_in:
+		return
+
+	var command := phrase.strip_edges().to_lower()
+	_awaiting_command = false
+	tts_manager.set_listening_enabled(false)
+
+	if command.contains("next"):
+		queuePointer = posmod(queuePointer + 1, CHARACTERS.size())
+		_moveAllDocksLeft()
+	elif command.contains("previous"):
+		queuePointer = posmod(queuePointer - 1, CHARACTERS.size())
+		_moveAllDocksRight()
+	elif command.contains("lock in"):
+		_lock_in_selection()
+	else:
+		_announce_selection()
+
+func _lock_in_selection() -> void:
+	_locked_in = true
+	var character_name: String = CHARACTERS[queuePointer]["name"]
+	var local_peer_id := multiplayer.get_unique_id()
+	if local_peer_id == 1:
+		CharacterDB.selected_p1 = character_name
+	else:
+		CharacterDB.selected_p2 = character_name
+	NetworkManager.submit_character(character_name)
+	tts_manager.queue_text("%s locked in." % character_name, 1)
