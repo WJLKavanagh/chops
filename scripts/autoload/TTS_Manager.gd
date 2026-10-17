@@ -51,7 +51,18 @@ func OnTimerTimeout() -> void:
 			if current_screen_text.strip_edges() == "":
 				return
 			
-				
+			#Speaking the actual text we want it to.
+		if current_screen_text != last_spoken_text or force_loop:
+			DisplayServer.tts_stop()
+			
+			var voices = DisplayServer.tts_get_voices()
+			if voices.size() > 0:
+				#ID string of voice from the background dictionary
+				var voice_id: String = voices[0]["id"]
+			
+				DisplayServer.tts_speak(current_screen_text, voice_id, 50, 1, 1)
+			
+			last_spoken_text = current_screen_text
 			
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

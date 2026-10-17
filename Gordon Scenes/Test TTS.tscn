@@ -5,6 +5,8 @@
 [node name="Start Menu Test" type="Label" unique_id=564342264 groups=["tts_element", "tts_loop"]]
 offset_right = 40.0
 offset_bottom = 23.0
+accessibility_name = "This is a test element"
+accessibility_description = "Testing Kabloom"
 text = "Kabloom Start"
 
 [node name="TTSController" type="Node" parent="." unique_id=866523331]
@@ -15,3 +17,9 @@ wait_time = 2.0
 autostart = true
 
 [node name="Node2D" type="Node2D" parent="." unique_id=999127375]
+
+[node name="Example" type="Label" parent="." unique_id=878190873 groups=["tts_element"]]
+layout_mode = 0
+offset_right = 100.0
+offset_bottom = 32.0
+text = "This is a test speech"
