@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://dbasgmuylveo5"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_akdkw"]
+
+[resource]
+script = ExtResource("1_akdkw")
+character_name = "James"
+desc_idle = "James stands ready to fight"
+desc_punch = "James Punches"
+desc_kick = "James Kicks"
+desc_jump = "James Jumps"
+desc_duck = "James Ducks"
+desc_super = "James Unleashes super"
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"
