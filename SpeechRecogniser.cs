@@ -1,3 +1,6 @@
+// DEPRECATED - use this only to check the vosk code. 
+// scripts/VoiceManager.cs is the main script now.
+
 using Godot;
 using System;
 using Vosk;

@@ -11,13 +11,17 @@ config_version=5
 [application]
 
 config/name="rhymeFighter"
-run/main_scene="uid://46o3w7jrjjln"
+run/main_scene="uid://fqoyh0erxo71"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [audio]
 
 buses/default_bus_layout="uid://4tro5nwd76q"
+
+[autoload]
+
+VoiceManager="*uid://r4nvqg44hfa7"
 
 [display]
 

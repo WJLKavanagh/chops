@@ -4,9 +4,9 @@ enum Move { NONE, HIGH_ATK, LOW_ATK, HIGH_BLK, LOW_BLK, SUPER }
 enum State { IDLE, INPUT, RESOLUTION, ROUND_OVER, MATCH_OVER }
 
 @export_group("Gameplay Constants")
-@export var max_health: int = 3
-@export var super_charge_req: int = 2
-@export var super_damage: int = 3 
+@export var max_health: int = 5
+@export var super_charge_req: int = 3
+@export var super_damage: int = 5 
 @export var base_damage: int = 1
 @export var turn_time_seconds: float = 5.0
 
@@ -44,8 +44,14 @@ func _ready() -> void:
 	randomize()
 	if has_node("/root/VoiceManager"):
 		var vm = get_node("/root/VoiceManager")
-		vm.connect("phrase_recognised", Callable(self, "_on_phrase_recognised"))
-		vm.SetGrammar(move_dict.keys())
+		
+		# Connect using the exact PascalCase string emitted by C#
+		vm.connect("PhraseRecognised", Callable(self, "_on_phrase_recognised"))
+		
+		# Cast to PackedStringArray so C# marshals it correctly to string[]
+		var grammar := PackedStringArray(move_dict.keys())
+		vm.SetGrammar(grammar)
+		
 	start_match()
 
 func start_match() -> void:
@@ -81,10 +87,16 @@ func _process(delta: float) -> void:
 		if time_remaining <= 0:
 			resolve_turn()
 
+	p1_status_label.text = "HP: %d | SP: %d/%d" % [p1_health, p1_super, super_charge_req]
+	p2_status_label.text = "HP: %d | SP: %d/%d" % [p2_health, p2_super, super_charge_req]
+
 	
 
 func _on_phrase_recognised(phrase: String) -> void:
+	print("--- STT SIGNAL RECEIVED: '%s' ---" % phrase)
+	
 	if current_state != State.INPUT:
+		print("Ignored: Not in INPUT phase.")
 		return
 		
 	if move_dict.has(phrase):
@@ -95,6 +107,8 @@ func _on_phrase_recognised(phrase: String) -> void:
 		p1_move = move_dict[phrase]
 		p1_action_label.text = "Locked In!"
 		print("Player selected: ", phrase)
+	else:
+		print("Ignored: '%s' is not in move dictionary." % phrase)
 
 func generate_ai_move() -> Move:
 	if p2_super >= super_charge_req:
@@ -113,6 +127,14 @@ func resolve_turn() -> void:
 	
 	evaluate_combat(p1_move, p2_move, true) 
 	evaluate_combat(p2_move, p1_move, false)
+	
+	# Debug printing block 
+	print("\n--- TURN RESOLUTION ---")
+	print("Player 1 Move: %s" % Move.keys()[p1_move])
+	print("Player 2 (AI) Move: %s" % Move.keys()[p2_move])
+	print("Outcome -> Player 1: HP %d | SP %d/%d" % [p1_health, p1_super, super_charge_req])
+	print("Outcome -> Player 2: HP %d | SP %d/%d" % [p2_health, p2_super, super_charge_req])
+	print("-----------------------\n")
 	
 	update_ui()
 	check_round_end()
