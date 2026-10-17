@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://b1xkk6v2n87a1"]
+
+[ext_resource type="Script" uid="uid://66gu2acp7sfp" path="res://scripts/main_menu.gd" id="1_qkhwq"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_vs068"]
+font_size = 80
+font_color = Color(0.9764706, 1, 0.078431375, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_c7uy4"]
+font_size = 80
+font_color = Color(0.06666667, 0.07058824, 0.09803922, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_qkhwq"]
+font_size = 40
+
+[node name="MainMenu" type="Node2D" unique_id=1023690726]
+script = ExtResource("1_qkhwq")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1861668032]
+offset_right = 1152.0
+offset_bottom = 655.0
+color = Color(0.48235294, 0, 1, 1)
+
+[node name="Title" type="Label" parent="." unique_id=784050250]
+offset_left = 273.0
+offset_top = 176.0
+offset_right = 763.0
+offset_bottom = 286.0
+text = "Fighting Talk"
+label_settings = SubResource("LabelSettings_vs068")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleAgain" type="Label" parent="." unique_id=831079483]
+offset_left = 790.0
+offset_top = 414.0
+offset_right = 1280.0
+offset_bottom = 524.0
+rotation = 3.1415927
+text = "Fighting Talk"
+label_settings = SubResource("LabelSettings_c7uy4")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StartPrompt" type="Label" parent="." unique_id=53747135]
+offset_left = 152.0
+offset_top = 449.0
+offset_right = 1068.0
+offset_bottom = 519.0
+text = "Say \"Let me kick that man in the head\" to begin"
+label_settings = SubResource("LabelSettings_qkhwq")
