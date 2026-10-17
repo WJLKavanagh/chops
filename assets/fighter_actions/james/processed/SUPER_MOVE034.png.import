@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://65i05jafmqrj"
-path="res://.godot/imported/ATTACK_HIGH00216112.png-58c62462c8092850aaf0879bd1553310.ctex"
+uid="uid://bmb7d0rky86g"
+path="res://.godot/imported/SUPER_MOVE034.png-17927d32c8d5fbdd0ee62b7f79dbcd7e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/fighter_actions/Cari/ATTACK_HIGH00216112.png"
-dest_files=["res://.godot/imported/ATTACK_HIGH00216112.png-58c62462c8092850aaf0879bd1553310.ctex"]
+source_file="res://assets/fighter_actions/james/processed/SUPER_MOVE034.png"
+dest_files=["res://.godot/imported/SUPER_MOVE034.png-17927d32c8d5fbdd0ee62b7f79dbcd7e.ctex"]
 
 [params]
 
