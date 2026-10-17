@@ -21,11 +21,16 @@ public partial class VoiceManager : Node
 	private WaveInEvent _waveIn;
 	
 	private bool _isRecording = false;
+	private bool _isFocused = true;
+	private bool _isDebugBuild = false;
 	private string _lastLoggedPartial = string.Empty;
 	private string[] _currentGrammar = Array.Empty<string>();
 
 	public override void _Ready()
 	{
+		// Detect if running from the Godot editor/debug build
+		_isDebugBuild = OS.IsDebugBuild();
+
 		string globalModelPath = ProjectSettings.GlobalizePath(ModelPath);
 		Vosk.Vosk.SetLogLevel(0);
 		
@@ -41,6 +46,19 @@ public partial class VoiceManager : Node
 			WaveFormat = new WaveFormat(16000, 1)
 		};
 		_waveIn.DataAvailable += OnAudioDataAvailable;
+	}
+
+	// Capture OS window focus changes
+	public override void _Notification(int what)
+	{
+		if (what == NotificationApplicationFocusIn)
+		{
+			_isFocused = true;
+		}
+		else if (what == NotificationApplicationFocusOut)
+		{
+			_isFocused = false;
+		}
 	}
 
 	// Called by GDScript to restrict what Vosk listens for
@@ -100,6 +118,9 @@ public partial class VoiceManager : Node
 	
 	private void ProcessRecognitionResult(string jsonResult, bool isFinal)
 	{
+		// Drop input if running two instances in the editor and this window lacks focus
+		if (_isDebugBuild && !_isFocused) return;
+
 		try
 		{
 			using JsonDocument doc = JsonDocument.Parse(jsonResult);
