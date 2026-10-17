@@ -5,7 +5,7 @@ const START_PHRASES: Array[String] = [
 	"let me kick a man in the head",
 	"ready to rumble",
 	"start the match",
-	"throw hands",
+	"throw hands", #Test
 	"rumble time",
 	"let me at them",
 	"hold me back bro"
