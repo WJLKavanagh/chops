@@ -84,7 +84,7 @@ func start_input_phase() -> void:
 		get_node("/root/VoiceManager").StartListening()
 
 func _process(delta: float) -> void:
-	if current_state == State.INPUT:
+	if current_state == State.INPUT and not is_tts_prompting:
 		time_remaining -= delta
 		status_label.text = "Time: %.1f" % time_remaining
 		
@@ -105,19 +105,36 @@ func _on_phrase_recognised(phrase: String) -> void:
 		
 	if move_dict.has(phrase):
 		if move_dict[phrase] == Move.SUPER and p1_super < super_charge_req:
+			tts.queue_text("Super not charged.", 1) #priority 1 to warn instant with tts
 			print("Super move not charged.")
 			return
 			
 		p1_move = move_dict[phrase]
 		p1_action_label.text = "Locked In!"
+		
+		#Audio for locked
+		tts.queue_text("Locked.", 1)
+		
 		print("Player selected: ", phrase)
 	else:
+		tts.queue_text("Unrecognised", 1)
 		print("Ignored: '%s' is not in move dictionary." % phrase)
 
 func generate_ai_move() -> Move:
 	if p2_super >= super_charge_req:
 		return Move.SUPER
 	return randi_range(1, 4) as Move
+	
+#function for turning enumns into the actual spoken player words
+func get_move_name(move_enum: Move) -> String:
+	match move_enum:
+		Move.NONE: return "nothing"
+		Move.HIGH_ATK: return "High Attack"
+		Move.LOW_ATK: return "Low Attack"
+		Move.HIGH_BLK: return "High Block"
+		Move.LOW_BLK: return "Low Block"
+		Move.SUPER: return "Supermove"
+	return "Unknown Move"
 
 func resolve_turn() -> void:
 	current_state = State.RESOLUTION
@@ -128,6 +145,11 @@ func resolve_turn() -> void:
 	
 	p1_action_label.text = Move.keys()[p1_move]
 	p2_action_label.text = Move.keys()[p2_move]
+	
+	#Health tracker
+	var p1_start_hp = p1_health
+	var p2_start_hp = p2_health
+	
 	
 	evaluate_combat(p1_move, p2_move, true) 
 	evaluate_combat(p2_move, p1_move, false)
@@ -141,6 +163,38 @@ func resolve_turn() -> void:
 	print("-----------------------\n")
 	
 	update_ui()
+	
+	#TTS combat narrative
+	if p1_move == Move.NONE:
+			tts.queue_text("You did zilch.")
+	else:
+			tts.queue_text("You used" + get_move_name(p1_move) + ".")
+	
+	tts.queue_text("The enemy used " + get_move_name(p2_move) + ".")
+	
+	var p1_dmg_taken = p1_start_hp - p1_health
+	var p2_dmg_taken = p2_start_hp - p2_health
+	
+	if p2_dmg_taken > 0:
+		tts.queue_text("You hit the enemy for " + str(p2_dmg_taken) + "damage!")
+	elif p1_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and p2_dmg_taken == 0:
+			tts.queue_text("Your attack was blocked, oh no.")
+			
+	if p1_dmg_taken > 0:
+			tts.queue_text("You hit the enemy for " + str(p2_dmg_taken) + " Damage!")
+	elif p2_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and p1_dmg_taken == 0:
+			tts.queue_text("You blocked, well done.")
+			
+	#Health state announcement
+	if p1_health == 1:
+		tts.queue_text("You have one health left")
+		
+	#Announcer narration when added to be stopped here
+	
+	await tts.tts_queue_finished
+	check_round_end()
+		
+		
 	check_round_end()
 
 func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool) -> void:
