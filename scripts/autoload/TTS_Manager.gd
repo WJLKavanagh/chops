@@ -60,8 +60,7 @@ func set_listening_enabled(enabled: bool) -> void:
 		bind_voice_manager()
 	if voice_manager != null and voice_manager.has_method("SetListeningEnabled"):
 		voice_manager.SetListeningEnabled(enabled)
-	elif not listening_enabled and voice_manager != null and voice_manager.has_method("StopListening"):
-		voice_manager.StopListening()
+	
 
 func on_screen_scan_timeout() -> void: #Next part SHOULD stop the system getting stuck when the player loads a new level
 	var active_scene = get_tree().current_scene.name if get_tree().current_scene else ""
@@ -141,8 +140,7 @@ func process_queue() -> void:
 	tts_started.emit()
 
 	# Mute mic while speaking
-	if voice_manager != null and voice_manager.has_method("StopListening"):
-		voice_manager.StopListening()
+
 
 	var text_to_speak = message_queue.pop_front()
 	DisplayServer.tts_speak(text_to_speak, voice_id, 50, 1.0, current_rate)

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://cbbwewc4xwho6"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_8umsl"]
+
+[resource]
+script = ExtResource("1_8umsl")
+character_name = "Morgan"
+desc_idle = "Morgan stands with poise ready to attack"
+desc_punch = "Morgan throws a jab out"
+desc_kick = "Morgan kicks"
+desc_jump = "Morgan Jumps"
+desc_duck = "Morgan ducks"
+desc_super = "Morgan does a rapid spin while landing a clean devastating strike to his opponent."
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"

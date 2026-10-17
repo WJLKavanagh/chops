@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://bv78ryaplngju"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_0md2l"]
+
+[resource]
+script = ExtResource("1_0md2l")
+character_name = "Phoebe"
+desc_idle = "Phoebe Stands ready to fight"
+desc_punch = "Phoebe Punches"
+desc_kick = "Phoebe Kicks"
+desc_jump = "Phoebe Jumps"
+desc_duck = "Phoebe Ducks"
+desc_super = "Phoebe Unleashes super"
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"

@@ -163,8 +163,8 @@ func resolve_turn() -> void:
 	var p2_start_hp = p2_health
 	
 	
-	evaluate_combat(p1_move, p2_move, true) 
-	evaluate_combat(p2_move, p1_move, false)
+	evaluate_combat(p1_move, p2_move, true, p1_data) 
+	evaluate_combat(p2_move, p1_move, false, p2_data)
 	
 	# Debug printing block 
 	print("\n--- TURN RESOLUTION ---")
@@ -176,13 +176,19 @@ func resolve_turn() -> void:
 	
 	update_ui()
 	
-	#TTS combat narrative
-	if p1_move == Move.NONE:
-			tts.queue_text("You did zilch.")
-	else:
-			tts.queue_text("You used" + get_move_name(p1_move) + ".")
+	var p1_action_text = p1_data.get_move_text(p1_move)
+	var p2_action_text = p2_data.get_move_text(p2_move)
 	
-	tts.queue_text("The enemy used " + get_move_name(p2_move) + ".")
+	tts.queue_text("You execute " + p1_action_text + ".")
+	tts.queue_text("The enemy " + p2_action_text + ".")
+	
+	#OLD TTS combat narrative, new narrative I have up above now
+	#if p1_move == Move.NONE:
+	#		tts.queue_text("You did zilch.")
+	#else:
+	#		tts.queue_text("You used" + get_move_name(p1_move) + ".")
+	
+	#tts.queue_text("The enemy used " + get_move_name(p2_move) + ".")
 	
 	var p1_dmg_taken = p1_start_hp - p1_health
 	var p2_dmg_taken = p2_start_hp - p2_health
@@ -207,7 +213,7 @@ func resolve_turn() -> void:
 		
 	check_round_end()
 
-func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool) -> void:
+func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool, attacker_data: FighterData) -> void:
 	if atk_move == Move.NONE or atk_move == Move.HIGH_BLK or atk_move == Move.LOW_BLK:
 		return
 		
