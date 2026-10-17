@@ -35,7 +35,6 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	if(Input.is_action_just_pressed("testRight")):
-		print("2")
 		_moveAllDocksRight()
 	pass
 	
@@ -66,14 +65,18 @@ func _moveAllDocksRight():
 	var moveOffL:bool = _moveEachDock(characterDockOffScreenL, offLTween, offLTweens, nonMainScale, leftPos.origin)
 	
 	if (moveL && moveR && moveMain && moveOffL):
+		print(3)
 		_resetMove()
 	pass
 	
 func _moveEachDock(dock,tween:Tween,tweens:Tween,scale:Vector2,position:Vector2,):
 	tween.tween_property(dock, "position", position, movementTime)
 	tweens.tween_property(dock, "scale", scale, movementTime)
-	tween.tween_callback(dock.queue_free)
-	return !tween.is_running()
+	#tween.tween_callback(dock.)
+	
+	if (tween.finished):
+		return true
+	return false
 	
 func _changeImage(characterDock):
 	#	Put image change here when image, for now, colour change
