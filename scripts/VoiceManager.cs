@@ -204,34 +204,58 @@ public partial class VoiceManager : Node
 		try
 		{
 			using JsonDocument doc = JsonDocument.Parse(jsonResult);
-			string searchKey = isFinal ? "text" : "partial";
+			string spokenText = string.Empty; //Start to GB fixes, I'll keep formatting the same, capital/lowercase
 			
-			if (doc.RootElement.TryGetProperty(searchKey, out JsonElement textElement))
+			if (isFinal)//Is Vosk using the alternatives array format check
 			{
-				string spokenText = textElement.GetString()?.Trim().ToLower() ?? string.Empty;
-
-				if (LogRecognitionResults && (isFinal || spokenText != _lastLoggedPartial))
+					if (doc.RootElement.TryGetProperty("alternatives", out JsonElement alternatives) && alternatives.GetArrayLength() > 0)
+					{
+							if (alternatives[0].TryGetProperty("text", out JsonElement altText)) //Grabbing whatever text from the highest confidence alternative/partial
+							{
+								spokenText = altText.GetString()?.Trim().ToLower() ?? string.Empty;
+							} 
+					}
+					
+					//if not, fallback to standard form/root text yay!
+					else if (doc.RootElement.TryGetProperty("text", out JsonElement textElement))
+					{
+						spokenText = textElement.GetString()?.Trim().ToLower() ?? string.Empty;
+					}
+			}
+			
+			else
+			{
+				if (doc.RootElement.TryGetProperty("partial", out JsonElement partialElement))
 				{
-					GD.Print($"Vosk {(isFinal ? "final" : "partial")}: {spokenText}");
-				}
-
-				_lastLoggedPartial = isFinal ? string.Empty : spokenText;
-
-				if (!_isRecording || string.IsNullOrWhiteSpace(spokenText)) return;
-
-				// Ignore the unknown token
-				if (spokenText.Contains("[unk]")) return;
-
-				if (isFinal)
-				{
-					EmitSignal(SignalName.PhraseAlternativesRecognised, GetAlternatives(doc.RootElement, spokenText));
-					EmitSignal(SignalName.PhraseRecognised, spokenText);
-				}
-				else
-				{
-					EmitSignal(SignalName.PartialPhraseRecognised, spokenText);
+					spokenText = partialElement.GetString()?.Trim().ToLower() ?? string.Empty;
 				}
 			}
+			
+			
+	
+
+			if (LogRecognitionResults && (isFinal || spokenText != _lastLoggedPartial))
+			{
+				GD.Print($"Vosk {(isFinal ? "final" : "partial")}: {spokenText}");
+			}
+
+			_lastLoggedPartial = isFinal ? string.Empty : spokenText;
+
+			if (!_isRecording || string.IsNullOrWhiteSpace(spokenText)) return;
+
+			// Ignore the unknown token
+			if (spokenText.Contains("[unk]")) return;
+
+			if (isFinal)
+			{
+				EmitSignal(SignalName.PhraseAlternativesRecognised, GetAlternatives(doc.RootElement, spokenText));
+				EmitSignal(SignalName.PhraseRecognised, spokenText);
+			}
+			else
+			{
+				EmitSignal(SignalName.PartialPhraseRecognised, spokenText);
+			}
+			
 		}
 		catch (JsonException exception)
 		{
