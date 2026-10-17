@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://b87hx7fco03ti" path="res://scripts/characterSelectScripts/characterSelectionScript.gd" id="1_ofdqn"]
 
 [node name="CharacterSelectScene" type="Node2D" unique_id=353054802]
-position = Vector2(960, 540)
 script = ExtResource("1_ofdqn")
 
 [node name="characterOffScreenL" type="ColorRect" parent="." unique_id=830743383]
@@ -12,10 +11,10 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -1430.0
-offset_top = -437.00003
-offset_right = -854.0
-offset_bottom = -194.00003
+offset_left = -460.00006
+offset_top = 101.99991
+offset_right = 115.99994
+offset_bottom = 344.9999
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.8, 0.8)
@@ -26,29 +25,29 @@ metadata/_edit_use_anchors_ = true
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 963.99994
-offset_top = -426.0
-offset_right = 1540.0
-offset_bottom = -183.0
+offset_left = 1933.9999
+offset_top = 112.99994
+offset_right = 2510.0
+offset_bottom = 355.99994
 grow_vertical = 2
 scale = Vector2(0.8, 0.8)
 color = Color(0.25575855, 0.8626845, 0.53983194, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterR" type="ColorRect" parent="." unique_id=646242057]
-offset_left = 632.0
-offset_top = -226.00003
-offset_right = 1208.0
-offset_bottom = 16.99997
+offset_left = 1602.0
+offset_top = 312.9999
+offset_right = 2178.0
+offset_bottom = 555.9999
 scale = Vector2(0.8, 0.8)
 color = Color(0.81468505, 0.7615168, 7.70092e-07, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterL" type="ColorRect" parent="." unique_id=1099410287]
-offset_left = -1091.9999
-offset_top = -231.00003
-offset_right = -515.9999
-offset_bottom = 11.9999695
+offset_left = -121.99994
+offset_top = 307.9999
+offset_right = 454.00006
+offset_bottom = 550.9999
 scale = Vector2(0.8, 0.8)
 color = Color(1, 0.69069636, 0.4787314, 1)
 metadata/_edit_use_anchors_ = true
@@ -59,10 +58,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -384.0
-offset_top = -162.0
-offset_right = 384.0
-offset_bottom = 162.0
+offset_left = 586.0
+offset_top = 377.0
+offset_right = 1354.0
+offset_bottom = 701.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.57396686, 0.4979421, 1)

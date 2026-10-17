@@ -9,7 +9,7 @@ var voice_id: String = ""
 var current_rate: float = 1.8 #Normal speed selected first.
 
 var voice_manager: Node
-var listening_enabled: bool = true
+var listening_enabled: bool = false
 var screen_scan_timer: Timer
 var completion_timer: Timer
 var last_spoken_text: String = ""

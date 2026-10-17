@@ -114,7 +114,6 @@ public partial class VoiceManager : Node
 	{
 		if (!_listeningEnabled)
 		{
-			GD.Print("VoiceManager: Ignored listening request while listening is disabled.");
 			return;
 		}
 

@@ -1,7 +1,7 @@
 extends Node
 
-@export var normal_volume_db: float = -12.0
-@export var ducked_volume_db: float = -28.0
+@export var normal_volume_db: float = -18.0
+@export var ducked_volume_db: float = -30.0
 @export var fade_duration: float = 0.35
 @export var menu_music: AudioStream
 
@@ -21,8 +21,8 @@ func _ready() -> void:
 	call_deferred("_connect_listeners")
 
 func _connect_listeners() -> void:
-	if has_node("/root/TtsManager"):
-		var tts = get_node("/root/TtsManager")
+	if has_node("/root/TTS_Manager"):
+		var tts = get_node("/root/TTS_Manager")
 		if not tts.tts_started.is_connected(_on_tts_started):
 			tts.tts_started.connect(_on_tts_started)
 		if not tts.tts_queue_finished.is_connected(_on_tts_finished):

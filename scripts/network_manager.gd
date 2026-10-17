@@ -147,5 +147,5 @@ func _check_phase_completion() -> void:
 func _rpc_transition_scene(scene_path: String) -> void:
 	print("Transitioning both clients to: ", scene_path)
 	phase_complete.emit(scene_path)
-	TTS_Manager.set_listening_enabled(true)
+	TTS_Manager.set_listening_enabled(scene_path != "res://scenes/characterSelectScene.tscn")
 	get_tree().change_scene_to_file(scene_path)
