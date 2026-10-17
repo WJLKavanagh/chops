@@ -111,13 +111,21 @@ public partial class VoiceManager : Node
 	}
 
 	// Called by GDScript to restrict what Vosk listens for
+	//UMMM okay, let's see, if the grammar is same as before IGNORE whatever command it is, should stop the roundel freeze mayhaps as it shouldn't spike CPU. Then I think just vosk in background thread too? Will this fuck up the network ver, it shouldn't I don't think but double check after.  
 	public void SetGrammar(string[] phrases)
 	{
 		string[] grammarPhrases = phrases ?? Array.Empty<string>();
-		VoskRecognizer replacement;
-
-		lock (_recognizerLock)
+		
+		if (_currentGrammar.SequenceEqual(grammarPhrases))
 		{
+			return; //Caps, uncaps, caps, noodles
+		}
+		
+		//Background thread start
+		System.Threading.Tasks.Task.Run(() =>
+		{
+			VoskRecognizer replacement;
+			
 			if (grammarPhrases.Length == 0)
 			{
 				replacement = new VoskRecognizer(_model, 16000.0f);
@@ -128,18 +136,31 @@ public partial class VoiceManager : Node
 				string grammarJson = JsonSerializer.Serialize(grammarPhrases.Concat(new[] { "[unk]" }));
 				replacement = new VoskRecognizer(_model, 16000.0f, grammarJson);
 			}
-
+			
 			replacement.SetWords(true);
 			replacement.SetPartialWords(true);
 			replacement.SetMaxAlternatives(3);
-
-			VoskRecognizer previous = _recognizer;
-			_recognizer = replacement;
-			_currentGrammar = grammarPhrases;
+			
+			VoskRecognizer previous; //Pretty much same as it used to be.
+			
+			//Okay, now locking the thread for a milisecond to get the pointer swapped. I'll just keep the old spelling from here before.
+			lock (_recognizerLock)
+			{
+				previous = _recognizer;
+				_recognizer = replacement; //American spelling for Vosk continuity is throwing me so much
+			}
+			
+			//FOUND OUT I NEED THIS, gets rid of the old recogniser outside of the lock so the audio thread never is hanging around
 			previous?.Dispose();
-		}
+			
+			CallDeferred(nameof(PrintGrammarUpdated));
+		});
+	}
+		
 
-		GD.Print("VoiceManager: Recogniser grammar updated.");
+	private void PrintGrammarUpdated() //Does as it says on the tin
+	{
+			GD.Print("Voice Manager: Recogniser of grammar updated");
 	}
 
 	public void StartListening()
