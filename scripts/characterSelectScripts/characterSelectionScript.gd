@@ -324,7 +324,7 @@ func _on_phrase_recognised(phrase: String) -> void:
 func _lock_in_selection() -> void:
 	var character_name: String = CHARACTERS[queuePointer]["name"]
 	if character_name != "Gordon":
-		tts_manager.queue_text("Only Gordon is available right now. Select Gordon and say lock in.", 1)
+		tts_manager.queue_text("Only Gordon is available right now. Select Gordon and say lock in.", 1) #THANK YOU for this comment, I was spending a while there (2 mins) trying to figure out why no one was selecting haha
 		await tts_manager.tts_queue_finished
 		_announce_selection()
 		return
