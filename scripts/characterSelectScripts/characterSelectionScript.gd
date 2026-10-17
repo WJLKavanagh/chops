@@ -167,6 +167,9 @@ func _resetDocks(dockToReset, position:Transform2D):
 	print("resetting")
 	dockToReset.position = position.origin
 	dockToReset.scale = position.get_scale()
+<<<<<<< HEAD
+=======
 	
 	moving = false
 	_changeImages()
+>>>>>>> d57f54892a0bd06a87c150986f2b63b5637488de
