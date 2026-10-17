@@ -6,6 +6,7 @@ signal tts_started
 var message_queue: Array[String] = []
 var is_speaking: bool = false
 var voice_id: String = ""
+var current_rate: float = 1.8 #Normal speed selected first.
 
 var voice_manager: Node
 var screen_scan_timer: Timer
@@ -134,7 +135,7 @@ func process_queue() -> void:
 		voice_manager.StopListening()
 
 	var text_to_speak = message_queue.pop_front()
-	DisplayServer.tts_speak(text_to_speak, voice_id, 50, 1.0, 1.5)
+	DisplayServer.tts_speak(text_to_speak, voice_id, current_rate)
 #SLOW IS Speed 1, Normal 1.8, Fast 2.2, Extra Fast 2.6 Super Fast 3.2
 # func _on_completion_poll() -> void:
 # 	if not DisplayServer.tts_is_speaking():
