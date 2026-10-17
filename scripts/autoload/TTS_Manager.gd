@@ -74,7 +74,7 @@ func on_screen_scan_timeout() -> void: #Next part SHOULD stop the system getting
 			
 			#If brand new text, clear queue and speak it (priority one)
 			if current_screen_text != last_spoken_text:
-				last_spoken_text = current_scene_text
+				last_spoken_text = current_screen_text
 				queue_text(current_screen_text, 1)
 				
 			#If looping menu text, only inject if game is silent
