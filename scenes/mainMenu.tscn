@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b1xkk6v2n87a1"]
 
 [ext_resource type="Script" uid="uid://66gu2acp7sfp" path="res://scripts/main_menu.gd" id="1_qkhwq"]
+[ext_resource type="Script" uid="uid://d0qxv1pic28rp" path="res://scripts/Speed_Selection.gd" id="2_3d1i7"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_vs068"]
 font_size = 80
@@ -49,3 +50,10 @@ offset_right = 1068.0
 offset_bottom = 519.0
 text = "Say \"Let me kick that man in the head\" to begin"
 label_settings = SubResource("LabelSettings_qkhwq")
+
+[node name="Control" type="Control" parent="." unique_id=870777522]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_3d1i7")

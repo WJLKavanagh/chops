@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://befhuvbbiqifh"]
+
+[ext_resource type="Script" uid="uid://d0qxv1pic28rp" path="res://scripts/Speed_Selection.gd" id="1_erws2"]
+
+[node name="Control" type="Control" unique_id=1283760082]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_erws2")
