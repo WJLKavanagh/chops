@@ -1,6 +1,20 @@
 extends Node
 
-@export var colourQueue = [Color.RED,Color.ORANGE,Color.YELLOW,Color.GREEN,Color.BLUE,Color.INDIGO,Color.VIOLET]
+const CHARACTERS: Array[Dictionary] = [
+	{
+		"name": "William",
+		"texture": preload("res://assets/fighters/william/1000041990.jpg")
+	},
+	{
+		"name": "Gordon",
+		"texture": preload("res://assets/fighter_actions/gordon/ATTACK_HIGH00216001.png")
+	},
+	{
+		"name": "Morgan",
+		"texture": preload("res://assets/fighter_actions/morgan/DODGE_HIGH00216002.png")
+	}
+]
+
 var queuePointer:int = 0
 
 @export var movementTime: float = 0.5
@@ -41,20 +55,21 @@ func _ready() -> void:
 	
 	dockList = [characterDockOffScreenL, characterDockLeft, characterDockMain, characterDockRight, characterDockOffScreenR]
 	
+	_setup_character_panels()
 	_changeImages()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if(Input.is_action_just_pressed("testRight")&&!moving):
 		moving = true
 		queuePointer-=1
 		if queuePointer==-1:
-			queuePointer = colourQueue.size()-1
+			queuePointer = CHARACTERS.size()-1
 		_moveAllDocksRight()
 	elif (Input.is_action_just_pressed("testLeft")&&!moving):
 		moving = true
 		queuePointer+=1
-		if queuePointer==colourQueue.size():
+		if queuePointer==CHARACTERS.size():
 			queuePointer = 0
 		_moveAllDocksLeft()
 	
@@ -107,13 +122,37 @@ func _moveEachDock(dock,tween:Tween,tweens:Tween,scale:Vector2,position:Vector2,
 	return false
 	
 func _changeImages():
-	for a in range(0,5):
-		var index = queuePointer+a
-		if(index>=colourQueue.size()):
-			index-=colourQueue.size()
-		dockList[a].color = colourQueue[index]
-	#	Put image change here when image, for now, colour change
-	pass
+	for panel_index in range(dockList.size()):
+		var character_index = posmod(queuePointer + panel_index - 2, CHARACTERS.size())
+		var character = CHARACTERS[character_index]
+		var dock = dockList[panel_index]
+		dock.color = Color.WHITE
+		dock.get_node("Portrait").texture = character["texture"]
+		dock.get_node("Name").text = character["name"]
+
+func _setup_character_panels() -> void:
+	for dock in dockList:
+		var portrait := TextureRect.new()
+		portrait.name = "Portrait"
+		portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dock.add_child(portrait)
+
+		var name_label := Label.new()
+		name_label.name = "Name"
+		name_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+		name_label.offset_top = -56.0
+		name_label.offset_bottom = -8.0
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		name_label.add_theme_font_size_override("font_size", 32)
+		name_label.add_theme_color_override("font_color", Color.WHITE)
+		name_label.add_theme_color_override("font_outline_color", Color.BLACK)
+		name_label.add_theme_constant_override("outline_size", 6)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dock.add_child(name_label)
 	
 func _resetMove():
 	print("reset")

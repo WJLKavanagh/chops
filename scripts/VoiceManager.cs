@@ -7,6 +7,9 @@ using System.Linq;
 
 public partial class VoiceManager : Node
 {
+	private const string RecordingStartSoundPath = "res://assets/audio/sfx/rec_start.wav";
+	private const string RecordingEndSoundPath = "res://assets/audio/sfx/rec_end.wav";
+
 	// Define signals for GDScript to connect to
 	[Signal] public delegate void PhraseRecognisedEventHandler(string phrase);
 	[Signal] public delegate void PartialPhraseRecognisedEventHandler(string phrase);
@@ -19,8 +22,11 @@ public partial class VoiceManager : Node
 	private Model _model;
 	private VoskRecognizer _recognizer;
 	private WaveInEvent _waveIn;
+	private AudioStreamPlayer _recordingStartPlayer;
+	private AudioStreamPlayer _recordingEndPlayer;
 	
 	private bool _isRecording = false;
+	private bool _listeningEnabled = true;
 	private bool _isFocused = true;
 	private bool _isDebugBuild = false;
 	private string _lastLoggedPartial = string.Empty;
@@ -30,6 +36,9 @@ public partial class VoiceManager : Node
 	{
 		// Detect if running from the Godot editor/debug build
 		_isDebugBuild = OS.IsDebugBuild();
+
+		_recordingStartPlayer = CreateRecordingCuePlayer(RecordingStartSoundPath);
+		_recordingEndPlayer = CreateRecordingCuePlayer(RecordingEndSoundPath);
 
 		string globalModelPath = ProjectSettings.GlobalizePath(ModelPath);
 		Vosk.Vosk.SetLogLevel(0);
@@ -46,6 +55,23 @@ public partial class VoiceManager : Node
 			WaveFormat = new WaveFormat(16000, 1)
 		};
 		_waveIn.DataAvailable += OnAudioDataAvailable;
+	}
+
+	private AudioStreamPlayer CreateRecordingCuePlayer(string resourcePath)
+	{
+		AudioStream stream = GD.Load<AudioStream>(resourcePath);
+		if (stream == null)
+		{
+			GD.PushError($"VoiceManager: Could not load recording cue at {resourcePath}.");
+			return null;
+		}
+
+		var player = new AudioStreamPlayer
+		{
+			Stream = stream
+		};
+		AddChild(player);
+		return player;
 	}
 
 	// Capture OS window focus changes
@@ -86,10 +112,17 @@ public partial class VoiceManager : Node
 
 	public void StartListening()
 	{
+		if (!_listeningEnabled)
+		{
+			GD.Print("VoiceManager: Ignored listening request while listening is disabled.");
+			return;
+		}
+
 		if (_isRecording) return;
 		
 		_isRecording = true;
 		_waveIn.StartRecording();
+		_recordingStartPlayer?.Play();
 		EmitSignal(SignalName.StatusChanged, true);
 		GD.Print("VoiceManager: Started listening.");
 	}
@@ -100,8 +133,18 @@ public partial class VoiceManager : Node
 		
 		_isRecording = false;
 		_waveIn.StopRecording();
+		_recordingEndPlayer?.Play();
 		EmitSignal(SignalName.StatusChanged, false);
 		GD.Print("VoiceManager: Stopped listening.");
+	}
+
+	public void SetListeningEnabled(bool enabled)
+	{
+		_listeningEnabled = enabled;
+		if (!enabled)
+		{
+			StopListening();
+		}
 	}
 
 	private void OnAudioDataAvailable(object sender, WaveInEventArgs e)

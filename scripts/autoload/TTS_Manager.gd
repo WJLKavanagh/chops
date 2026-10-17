@@ -9,6 +9,7 @@ var voice_id: String = ""
 var current_rate: float = 1.8 #Normal speed selected first.
 
 var voice_manager: Node
+var listening_enabled: bool = true
 var screen_scan_timer: Timer
 var completion_timer: Timer
 var last_spoken_text: String = ""
@@ -52,6 +53,15 @@ func _process(delta: float) -> void:
 
 func bind_voice_manager() -> void:
 	voice_manager = get_tree().root.get_node_or_null("VoiceManager")
+
+func set_listening_enabled(enabled: bool) -> void:
+	listening_enabled = enabled
+	if voice_manager == null:
+		bind_voice_manager()
+	if voice_manager != null and voice_manager.has_method("SetListeningEnabled"):
+		voice_manager.SetListeningEnabled(enabled)
+	elif not listening_enabled and voice_manager != null and voice_manager.has_method("StopListening"):
+		voice_manager.StopListening()
 
 func on_screen_scan_timeout() -> void: #Next part SHOULD stop the system getting stuck when the player loads a new level
 	var active_scene = get_tree().current_scene.name if get_tree().current_scene else ""
@@ -163,7 +173,7 @@ func _on_tts_utterance_ended(_utterance_id: int) -> void:
 		loop_cooldown = 6.0
 		tts_queue_finished.emit()
 
-		if voice_manager != null and voice_manager.has_method("StartListening"):
+		if listening_enabled and voice_manager != null and voice_manager.has_method("StartListening"):
 			voice_manager.StartListening()
 
 func prompt_player_for_action(text: String = "Your turn.") -> void:

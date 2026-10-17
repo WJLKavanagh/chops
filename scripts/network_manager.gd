@@ -8,6 +8,7 @@ const PORT = 54321	# TODO: Confirm this port later on.
 @export var target_ip: String = "127.0.0.1" # TODO: This is set to localhost for now
 
 var _peer = ENetMultiplayerPeer.new()
+var _character_select_transition_started: bool = false
 
 # The central data blob. Keys are peer IDs (1 for host, dynamically generated for client).
 # Values are dictionaries holding the player's current state and choices.
@@ -59,6 +60,9 @@ func _on_connection_failed() -> void:
 func _on_peer_connected(id: int) -> void:
 	print("Peer %d connected." % id)
 	_initialise_player_data(id)
+	if multiplayer.is_server() and session_data.size() >= 2 and not _character_select_transition_started:
+		_character_select_transition_started = true
+		rpc("_rpc_transition_scene", "res://scenes/characterSelectScene.tscn")
 
 func _on_peer_disconnected(id: int) -> void:
 	print("Peer %d disconnected." % id)
@@ -131,7 +135,7 @@ func _check_phase_completion() -> void:
 		# Define your scene flow here based on current state
 		var next_scene = ""
 		if session_data[1]["character_id"] == "":
-			next_scene = "res://scenes/CharacterSelect.tscn"
+			next_scene = "res://scenes/characterSelectScene.tscn"
 		elif session_data[1]["move_names"].size() == 0:
 			next_scene = "res://scenes/MoveBinding.tscn"
 		else:
@@ -143,4 +147,5 @@ func _check_phase_completion() -> void:
 func _rpc_transition_scene(scene_path: String) -> void:
 	print("Transitioning both clients to: ", scene_path)
 	phase_complete.emit(scene_path)
+	TTS_Manager.set_listening_enabled(true)
 	get_tree().change_scene_to_file(scene_path)
