@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="rhymeFighter"
-run/main_scene="uid://46o3w7jrjjln"
+run/main_scene="uid://b1xkk6v2n87a1"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -21,7 +21,10 @@ buses/default_bus_layout="uid://4tro5nwd76q"
 
 [autoload]
 
+VoiceManager="*uid://r4nvqg44hfa7"
 TtsManager="*uid://b1f7p2lfjgk8f"
+NetworkManager="*uid://c103bahd8mev2"
+MusicManager="*uid://vsyxuw6i3siy"
 
 [display]
 
