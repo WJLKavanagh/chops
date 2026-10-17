@@ -42,6 +42,15 @@ func OnTimerTimeout() -> void:
 		elif "custom_tts_string" in element:
 			#Custom variables 
 			current_screen_text += element.custom_tts_string + ". "
+			
+			#is a loop element active (loop group)?
+			if element.is_in_group("tts_loop") or ("is_looping" in element and element.is_looping):
+				force_loop = true
+			
+			
+			
+				
+			
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
