@@ -105,6 +105,12 @@ func _setup_character_panels() -> void:
 		idle_sprite.centered = true
 		dock.add_child(idle_sprite)
 
+		var fallback_sprite := Sprite2D.new()
+		fallback_sprite.name = "FallbackSprite"
+		fallback_sprite.position = dock.size * 0.5
+		fallback_sprite.centered = true
+		dock.add_child(fallback_sprite)
+
 		var name_label := Label.new()
 		name_label.name = "Name"
 		name_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -175,29 +181,67 @@ func _changeImages() -> void:
 		var dock := dockList[slot]
 		var portrait := dock.get_node("Portrait") as TextureRect
 		var idle_sprite := dock.get_node("IdleAnimation") as AnimatedSprite2D
+		var fallback_sprite := dock.get_node("FallbackSprite") as Sprite2D
 		var character_name: String = character["name"].to_lower()
 		var idle_frames := _idle_animations.get(character_name) as SpriteFrames
+
+		# lets make that label massive
+		var name_label := dock.get_node("Name") as Label
 
 		if idle_frames != null:
 			idle_sprite.sprite_frames = idle_frames
 			idle_sprite.animation = "idle"
 			idle_sprite.visible = true
+			fallback_sprite.visible = false
 			portrait.texture = null
+			name_label.add_theme_font_size_override("font_size", 72)
+
+			# Move it further down
+			name_label.offset_top = -20.0
+			name_label.offset_bottom = 36.0
 			var first_frame := idle_frames.get_frame_texture("idle", 0)
 			if first_frame != null:
-				var fit_scale := minf(
-					(dock.size.x * 0.72) / first_frame.get_width(),
-					(dock.size.y * 0.72) / first_frame.get_height()
-				)
+				var fit_scale := (dock.size.y * 2.3) / first_frame.get_height()
 				idle_sprite.scale = Vector2.ONE * fit_scale
+				idle_sprite.offset = _get_visual_center_offset(first_frame)
 			idle_sprite.play("idle")
 		else:
 			idle_sprite.stop()
 			idle_sprite.visible = false
-			portrait.texture = character["texture"]
+			name_label.add_theme_font_size_override("font_size", 40)
 
-		dock.color = Color.WHITE if idle_frames != null or portrait.texture != null else PLACEHOLDER_COLORS[character_index % PLACEHOLDER_COLORS.size()]
+			name_label.offset_top = -64.0
+			name_label.offset_bottom = -8.0
+			var fallback_texture := character["texture"] as Texture2D
+			if fallback_texture != null:
+				var fallback_image := fallback_texture.get_image()
+				if fallback_image != null and not fallback_image.is_empty() and fallback_image.detect_alpha():
+					fallback_sprite.texture = fallback_texture
+					fallback_sprite.offset = _get_visual_center_offset(fallback_texture)
+					fallback_sprite.scale = Vector2.ONE * (dock.size.y * 1.15 / fallback_texture.get_height())
+					fallback_sprite.visible = true
+					portrait.texture = null
+				else:
+					fallback_sprite.visible = false
+					portrait.texture = fallback_texture
+			else:
+				fallback_sprite.visible = false
+				portrait.texture = null
+
+		dock.color = Color(1, 1, 1, 0) if idle_frames != null or fallback_sprite.visible or portrait.texture != null else PLACEHOLDER_COLORS[character_index % PLACEHOLDER_COLORS.size()]
 		dock.get_node("Name").text = character["name"]
+
+func _get_visual_center_offset(texture: Texture2D) -> Vector2:
+	var image := texture.get_image()
+	if image == null or image.is_empty():
+		return Vector2.ZERO
+
+	var visible_bounds := image.get_used_rect()
+	if visible_bounds.size.x <= 0 or visible_bounds.size.y <= 0:
+		return Vector2.ZERO
+
+	var visible_center := Vector2(visible_bounds.position) + Vector2(visible_bounds.size) * 0.5
+	return Vector2(texture.get_size()) * 0.5 - visible_center
 
 func _resetMove() -> void:
 	_resetDock(characterDockLeft, leftPos)
@@ -278,8 +322,14 @@ func _on_phrase_recognised(phrase: String) -> void:
 		_announce_selection()
 
 func _lock_in_selection() -> void:
-	_locked_in = true
 	var character_name: String = CHARACTERS[queuePointer]["name"]
+	if character_name != "Gordon":
+		tts_manager.queue_text("Only Gordon is available right now. Select Gordon and say lock in.", 1)
+		await tts_manager.tts_queue_finished
+		_announce_selection()
+		return
+
+	_locked_in = true
 	var local_peer_id := multiplayer.get_unique_id()
 	if local_peer_id == 1:
 		CharacterDB.selected_p1 = character_name

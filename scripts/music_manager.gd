@@ -9,6 +9,7 @@ var audio_player: AudioStreamPlayer
 var volume_tween: Tween
 
 var _is_tts_active: bool = false
+var _is_stt_listening: bool = false
 
 func _ready() -> void:
 	audio_player = AudioStreamPlayer.new()
@@ -27,6 +28,12 @@ func _connect_listeners() -> void:
 			tts.tts_started.connect(_on_tts_started)
 		if not tts.tts_queue_finished.is_connected(_on_tts_finished):
 			tts.tts_queue_finished.connect(_on_tts_finished)
+			
+	# RESTORED: Listen to VoiceManager to duck audio during STT input
+	if has_node("/root/VoiceManager"):
+		var vm = get_node("/root/VoiceManager")
+		if not vm.StatusChanged.is_connected(_on_stt_status_changed):
+			vm.StatusChanged.connect(_on_stt_status_changed)
 
 func play_track(track: AudioStream) -> void:
 	if track == null:
@@ -49,8 +56,14 @@ func _on_tts_finished() -> void:
 	_is_tts_active = false
 	_evaluate_volume()
 
+func _on_stt_status_changed(is_listening: bool) -> void:
+	_is_stt_listening = is_listening
+	_evaluate_volume()
+
 func _evaluate_volume(instant: bool = false) -> void:
-	var target_db = ducked_volume_db if _is_tts_active else normal_volume_db
+	# Check both flags. If either system is active, duck the music.
+	var should_duck = _is_tts_active or _is_stt_listening
+	var target_db = ducked_volume_db if should_duck else normal_volume_db
 
 	if instant:
 		if volume_tween and volume_tween.is_running():

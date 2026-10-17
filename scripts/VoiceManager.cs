@@ -12,6 +12,7 @@ public partial class VoiceManager : Node
 
 	// Define signals for GDScript to connect to
 	[Signal] public delegate void PhraseRecognisedEventHandler(string phrase);
+	[Signal] public delegate void PhraseAlternativesRecognisedEventHandler(string[] phrases);
 	[Signal] public delegate void PartialPhraseRecognisedEventHandler(string phrase);
 	[Signal] public delegate void StatusChangedEventHandler(bool isListening);
 
@@ -21,6 +22,7 @@ public partial class VoiceManager : Node
 
 	private Model _model;
 	private VoskRecognizer _recognizer;
+	private readonly object _recognizerLock = new();
 	private WaveInEvent _waveIn;
 	private AudioStreamPlayer _recordingStartPlayer;
 	private AudioStreamPlayer _recordingEndPlayer;
@@ -80,39 +82,69 @@ public partial class VoiceManager : Node
 		if (what == NotificationApplicationFocusIn)
 		{
 			_isFocused = true;
+			CallDeferred(nameof(ResumeListeningIfAllowed));
 		}
 		else if (what == NotificationApplicationFocusOut)
 		{
 			_isFocused = false;
+			if (_isDebugBuild)
+			{
+				StopListening();
+			}
 		}
+	}
+
+	private void ResumeListeningIfAllowed()
+	{
+		if (!_isDebugBuild || !_isFocused || !_listeningEnabled || IsTtsSpeaking())
+		{
+			return;
+		}
+
+		StartListening();
+	}
+
+	private bool IsTtsSpeaking()
+	{
+		Node ttsManager = GetNodeOrNull<Node>("/root/TTS_Manager");
+		return ttsManager != null && ttsManager.Get("is_speaking").AsBool();
 	}
 
 	// Called by GDScript to restrict what Vosk listens for
 	public void SetGrammar(string[] phrases)
 	{
-		_currentGrammar = phrases;
-		_recognizer?.Dispose();
-		
-		if (phrases == null || phrases.Length == 0)
+		string[] grammarPhrases = phrases ?? Array.Empty<string>();
+		VoskRecognizer replacement;
+
+		lock (_recognizerLock)
 		{
-			// Open dictation mode
-			_recognizer = new VoskRecognizer(_model, 16000.0f);
+			if (grammarPhrases.Length == 0)
+			{
+				replacement = new VoskRecognizer(_model, 16000.0f);
+			}
+			else
+			{
+				// Restricted grammar mode. [unk] handles out-of-grammar noise.
+				string grammarJson = JsonSerializer.Serialize(grammarPhrases.Concat(new[] { "[unk]" }));
+				replacement = new VoskRecognizer(_model, 16000.0f, grammarJson);
+			}
+
+			replacement.SetWords(true);
+			replacement.SetPartialWords(true);
+			replacement.SetMaxAlternatives(3);
+
+			VoskRecognizer previous = _recognizer;
+			_recognizer = replacement;
+			_currentGrammar = grammarPhrases;
+			previous?.Dispose();
 		}
-		else
-		{
-			// Restricted grammar mode. [unk] is required by Vosk to handle out-of-grammar noise
-			string grammarJson = JsonSerializer.Serialize(phrases.Concat(new[] { "[unk]" }));
-			_recognizer = new VoskRecognizer(_model, 16000.0f, grammarJson);
-		}
-		
-		_recognizer.SetWords(true);
-		_recognizer.SetPartialWords(true);
+
 		GD.Print("VoiceManager: Recogniser grammar updated.");
 	}
 
 	public void StartListening()
 	{
-		if (!_listeningEnabled)
+		if (!_listeningEnabled || (_isDebugBuild && !_isFocused))
 		{
 			return;
 		}
@@ -121,7 +153,7 @@ public partial class VoiceManager : Node
 		
 		_isRecording = true;
 		_waveIn.StartRecording();
-		_recordingStartPlayer?.Play();
+		//_recordingStartPlayer?.Play(); // EARCON removed because it sucks.
 		EmitSignal(SignalName.StatusChanged, true);
 		GD.Print("VoiceManager: Started listening.");
 	}
@@ -132,7 +164,7 @@ public partial class VoiceManager : Node
 		
 		_isRecording = false;
 		_waveIn.StopRecording();
-		_recordingEndPlayer?.Play();
+		//_recordingEndPlayer?.Play();	// gross ding removed
 		EmitSignal(SignalName.StatusChanged, false);
 		GD.Print("VoiceManager: Stopped listening.");
 	}
@@ -148,14 +180,20 @@ public partial class VoiceManager : Node
 
 	private void OnAudioDataAvailable(object sender, WaveInEventArgs e)
 	{
-		if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
+		bool isFinal;
+		string result;
+		lock (_recognizerLock)
 		{
-			CallDeferred(nameof(ProcessRecognitionResult), _recognizer.Result(), true);
+			if (_recognizer == null)
+			{
+				return;
+			}
+
+			isFinal = _recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded);
+			result = isFinal ? _recognizer.Result() : _recognizer.PartialResult();
 		}
-		else
-		{
-			CallDeferred(nameof(ProcessRecognitionResult), _recognizer.PartialResult(), false);
-		}
+
+		CallDeferred(nameof(ProcessRecognitionResult), result, isFinal);
 	}
 	
 	private void ProcessRecognitionResult(string jsonResult, bool isFinal)
@@ -186,6 +224,7 @@ public partial class VoiceManager : Node
 
 				if (isFinal)
 				{
+					EmitSignal(SignalName.PhraseAlternativesRecognised, GetAlternatives(doc.RootElement, spokenText));
 					EmitSignal(SignalName.PhraseRecognised, spokenText);
 				}
 				else
@@ -200,6 +239,30 @@ public partial class VoiceManager : Node
 		}
 	}
 
+	private static string[] GetAlternatives(JsonElement root, string bestPhrase)
+	{
+		var phrases = new System.Collections.Generic.List<string> { bestPhrase };
+		if (root.TryGetProperty("alternatives", out JsonElement alternatives) &&
+			alternatives.ValueKind == JsonValueKind.Array)
+		{
+			foreach (JsonElement alternative in alternatives.EnumerateArray())
+			{
+				if (!alternative.TryGetProperty("text", out JsonElement text))
+				{
+					continue;
+				}
+
+				string phrase = text.GetString()?.Trim().ToLowerInvariant() ?? string.Empty;
+				if (!string.IsNullOrWhiteSpace(phrase) && !phrases.Contains(phrase))
+				{
+					phrases.Add(phrase);
+				}
+			}
+		}
+
+		return phrases.ToArray();
+	}
+
 	public override void _ExitTree()
 	{
 		if (_waveIn != null)
@@ -207,7 +270,11 @@ public partial class VoiceManager : Node
 			_waveIn.StopRecording();
 			_waveIn.Dispose();
 		}
-		_recognizer?.Dispose();
+		lock (_recognizerLock)
+		{
+			_recognizer?.Dispose();
+			_recognizer = null;
+		}
 		_model?.Dispose();
 	}
 }

@@ -18,7 +18,7 @@ offset_bottom = 344.9999
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.8, 0.8)
-color = Color(0.48960084, 0.78214043, 0.9182856, 1)
+color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterOffScreenR" type="ColorRect" parent="." unique_id=668670628]
@@ -31,7 +31,7 @@ offset_right = 2510.0
 offset_bottom = 355.99994
 grow_vertical = 2
 scale = Vector2(0.8, 0.8)
-color = Color(0.25575855, 0.8626845, 0.53983194, 1)
+color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterR" type="ColorRect" parent="." unique_id=646242057]
@@ -40,7 +40,7 @@ offset_top = 312.9999
 offset_right = 2178.0
 offset_bottom = 555.9999
 scale = Vector2(0.8, 0.8)
-color = Color(0.81468505, 0.7615168, 7.70092e-07, 1)
+color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterL" type="ColorRect" parent="." unique_id=1099410287]
@@ -49,7 +49,7 @@ offset_top = 307.9999
 offset_right = 454.00006
 offset_bottom = 550.9999
 scale = Vector2(0.8, 0.8)
-color = Color(1, 0.69069636, 0.4787314, 1)
+color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
 
 [node name="characterMain" type="ColorRect" parent="." unique_id=1508823860]
@@ -64,5 +64,5 @@ offset_right = 1354.0
 offset_bottom = 701.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 0.57396686, 0.4979421, 1)
+color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true

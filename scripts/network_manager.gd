@@ -5,10 +5,14 @@ signal player_data_updated(peer_id: int)
 signal phase_complete(next_scene_path: String)
 
 const PORT = 54321	# TODO: Confirm this port later on.
+const SUPPORTED_CHARACTERS: PackedStringArray = ["Gordon"]
+const CHARACTER_SELECT_SCENE := "res://scenes/characterSelectScene.tscn"
+const MOVE_SELECTOR_SCENE := "res://scenes/move_selector.tscn"
 @export var target_ip: String = "127.0.0.1" # TODO: This is set to localhost for now
 
 var _peer = ENetMultiplayerPeer.new()
 var _character_select_transition_started: bool = false
+var _move_selector_transition_started: bool = false
 
 # The central data blob. Keys are peer IDs (1 for host, dynamically generated for client).
 # Values are dictionaries holding the player's current state and choices.
@@ -62,7 +66,7 @@ func _on_peer_connected(id: int) -> void:
 	_initialise_player_data(id)
 	if multiplayer.is_server() and session_data.size() >= 2 and not _character_select_transition_started:
 		_character_select_transition_started = true
-		rpc("_rpc_transition_scene", "res://scenes/characterSelectScene.tscn")
+		rpc("_rpc_transition_scene", CHARACTER_SELECT_SCENE)
 
 func _on_peer_disconnected(id: int) -> void:
 	print("Peer %d disconnected." % id)
@@ -95,23 +99,58 @@ func set_ready(ready_state: bool) -> void:
 
 @rpc("any_peer", "call_local", "reliable")
 func _rpc_update_character(char_id: String) -> void:
-	var sender_id = multiplayer.get_remote_sender_id()
-	session_data[sender_id]["character_id"] = char_id
+	var normalized_char_id := char_id.strip_edges()
+	if not SUPPORTED_CHARACTERS.has(normalized_char_id):
+		push_warning("NetworkManager: Unsupported character selection: %s" % normalized_char_id)
+		return
+
+	var sender_id := _get_rpc_sender_id()
+	_ensure_player_data(sender_id)
+	session_data[sender_id]["character_id"] = normalized_char_id
+	if sender_id == 1:
+		CharacterDB.selected_p1 = normalized_char_id
+	else:
+		CharacterDB.selected_p2 = normalized_char_id
 	player_data_updated.emit(sender_id)
+	_check_character_selection_complete()
 
 @rpc("any_peer", "call_local", "reliable")
 func _rpc_update_moves(moves: PackedStringArray) -> void:
-	var sender_id = multiplayer.get_remote_sender_id()
+	var sender_id := _get_rpc_sender_id()
+	_ensure_player_data(sender_id)
 	session_data[sender_id]["move_names"] = moves
 	player_data_updated.emit(sender_id)
 
 @rpc("any_peer", "call_local", "reliable")
 func _rpc_set_ready(ready_state: bool) -> void:
-	var sender_id = multiplayer.get_remote_sender_id()
+	var sender_id := _get_rpc_sender_id()
+	_ensure_player_data(sender_id)
 	session_data[sender_id]["is_ready"] = ready_state
 	player_data_updated.emit(sender_id)
 	
 	_check_phase_completion()
+
+func _get_rpc_sender_id() -> int:
+	var remote_sender_id := multiplayer.get_remote_sender_id()
+	return remote_sender_id if remote_sender_id != 0 else multiplayer.get_unique_id()
+
+func _ensure_player_data(peer_id: int) -> void:
+	if not session_data.has(peer_id):
+		_initialise_player_data(peer_id)
+
+func _check_character_selection_complete() -> void:
+	if not multiplayer.is_server() or _move_selector_transition_started:
+		return
+	if session_data.size() < 2:
+		return
+
+	for peer_id in session_data:
+		var char_id: String = session_data[peer_id]["character_id"]
+		if not SUPPORTED_CHARACTERS.has(char_id):
+			return
+
+	_move_selector_transition_started = true
+	rpc("_rpc_transition_scene", MOVE_SELECTOR_SCENE)
 
 func _check_phase_completion() -> void:
 	# Only the host dictates scene transitions to prevent race conditions
@@ -135,9 +174,9 @@ func _check_phase_completion() -> void:
 		# Define your scene flow here based on current state
 		var next_scene = ""
 		if session_data[1]["character_id"] == "":
-			next_scene = "res://scenes/characterSelectScene.tscn"
+			next_scene = CHARACTER_SELECT_SCENE
 		elif session_data[1]["move_names"].size() == 0:
-			next_scene = "res://scenes/MoveBinding.tscn"
+			next_scene = MOVE_SELECTOR_SCENE
 		else:
 			next_scene = "res://scenes/fight.tscn"
 			

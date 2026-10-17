@@ -26,14 +26,11 @@ var swap_timer: Timer
 func _ready() -> void:
 	TTS_Manager.set_listening_enabled(true)
 
-	# Select the initial phrase at random rather than hardcoding "get fighting"
 	active_phrase = START_PHRASES.pick_random()
 	
 	start_prompt.text = "Say '%s' to start" % active_phrase
 	start_prompt.add_to_group("tts_element")
-	start_prompt.add_to_group("tts_loop")
 	
-	# Initialise the 10-second swap timer
 	swap_timer = Timer.new()
 	swap_timer.wait_time = 10.0
 	swap_timer.autostart = true
@@ -42,13 +39,15 @@ func _ready() -> void:
 	
 	var valid_words = _build_padded_grammar(active_phrase)
 	
-	# Connect STT using direct Autoload
 	if not VoiceManager.PhraseRecognised.is_connected(_on_phrase_recognised):
 		VoiceManager.PhraseRecognised.connect(_on_phrase_recognised)
 		
+	# Listen to the continuous stream of partial words
+	if not VoiceManager.PartialPhraseRecognised.is_connected(_on_partial_recognised):
+		VoiceManager.PartialPhraseRecognised.connect(_on_partial_recognised)
+		
 	VoiceManager.SetGrammar(PackedStringArray(valid_words))
 		
-	# Connect Network signals using direct Autoload
 	if not NetworkManager.match_started.is_connected(_on_match_started):
 		NetworkManager.match_started.connect(_on_match_started)
 
@@ -128,3 +127,20 @@ func _on_match_started(is_host: bool) -> void:
 		start_prompt.text = "Hosting match. Waiting for player 2..."
 	else:
 		start_prompt.text = "Joined match! Proceeding..."
+
+func _on_partial_recognised(phrase: String) -> void:
+	if is_processing_input:
+		return
+		
+	# Eagerly accept the win condition the exact millisecond it is spoken
+	if active_phrase in phrase:
+		is_processing_input = true
+		swap_timer.stop()
+		TTS_Manager.set_listening_enabled(false)
+		
+		print("Start phrase recognised from partial stream! Initiating network connection...")
+		
+		start_prompt.text = "Connecting..."
+		
+		VoiceManager.StopListening()
+		NetworkManager.start_lan_match()
