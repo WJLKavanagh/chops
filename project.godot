@@ -21,8 +21,8 @@ buses/default_bus_layout="uid://4tro5nwd76q"
 
 [autoload]
 
+TTS_Manager="*uid://b1f7p2lfjgk8f"
 VoiceManager="*uid://r4nvqg44hfa7"
-TtsManager="*uid://b1f7p2lfjgk8f"
 NetworkManager="*uid://c103bahd8mev2"
 MusicManager="*uid://vsyxuw6i3siy"
 

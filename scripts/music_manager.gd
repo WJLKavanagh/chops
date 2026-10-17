@@ -15,8 +15,8 @@ func _ready() -> void:
 	audio_player = AudioStreamPlayer.new()
 	add_child(audio_player)
 	
-	if has_node("/root/MusicManager") and menu_music:
-		MusicManager.play_track(menu_music)
+	#if has_node("/root/MusicManager") and menu_music:
+	#	MusicManager.play_track(menu_music)
 	
 	# Connect to the C# STT status signal
 	if has_node("/root/VoiceManager"):

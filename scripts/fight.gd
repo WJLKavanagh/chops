@@ -192,8 +192,6 @@ func resolve_turn() -> void:
 	#Announcer narration when added to be stopped here
 	
 	await tts.tts_queue_finished
-	check_round_end()
-		
 		
 	check_round_end()
 
