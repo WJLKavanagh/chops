@@ -25,6 +25,12 @@ offset_top = -147.0
 offset_right = -9.0
 offset_bottom = -124.0
 
+[node name="HealthAndCharge" type="Label" parent="Arena/FighterLeft" unique_id=993343243]
+offset_left = -69.0
+offset_top = 138.0
+offset_right = 89.0
+offset_bottom = 173.0
+
 [node name="FighterRight" type="Node2D" parent="Arena" unique_id=370669030]
 position = Vector2(866, 396)
 
@@ -40,6 +46,12 @@ offset_left = -30.0
 offset_top = -125.0
 offset_right = 10.0
 offset_bottom = -102.0
+
+[node name="HealthAndCharge" type="Label" parent="Arena/FighterRight" unique_id=125538257]
+offset_left = -73.0
+offset_top = 145.0
+offset_right = 85.0
+offset_bottom = 180.0
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1541469455]
 
