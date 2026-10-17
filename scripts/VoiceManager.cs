@@ -121,6 +121,9 @@ public partial class VoiceManager : Node
 			return; //Caps, uncaps, caps, noodles
 		}
 		
+		//OMFG, Might help if I actually save the updated grammar before rebuilding it lmao
+		_currentGrammar = grammarPhrases;
+		
 		//Background thread start
 		System.Threading.Tasks.Task.Run(() =>
 		{
