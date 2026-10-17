@@ -310,6 +310,39 @@
 [ext_resource type="Texture2D" uid="uid://b0q4ul17o8njq" path="res://assets/fighter_actions/gordon/processed/SUPER_MOVE039.png" id="308_nx07d"]
 [ext_resource type="Texture2D" uid="uid://dyrh2ruolceh0" path="res://assets/fighter_actions/gordon/processed/SUPER_MOVE040.png" id="309_0guu5"]
 [ext_resource type="Texture2D" uid="uid://b4gf8wqc6rtsu" path="res://assets/fighter_actions/gordon/processed/SUPER_MOVE041.png" id="310_ye0hx"]
+[ext_resource type="Texture2D" uid="uid://bmcxn2abhxo1a" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE001.png" id="311_4s1qa"]
+[ext_resource type="Texture2D" uid="uid://db0nsbamltige" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE002.png" id="312_j7sse"]
+[ext_resource type="Texture2D" uid="uid://bqt05styq17kb" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE003.png" id="313_8u6vw"]
+[ext_resource type="Texture2D" uid="uid://brxyj3s61r2el" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE004.png" id="314_scf8x"]
+[ext_resource type="Texture2D" uid="uid://bj7vq6aq2v8i5" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE005.png" id="315_t4ubb"]
+[ext_resource type="Texture2D" uid="uid://cmx0xvrcjwm1e" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE006.png" id="316_4tbq5"]
+[ext_resource type="Texture2D" uid="uid://c50dgsji62u6c" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE007.png" id="317_j26cq"]
+[ext_resource type="Texture2D" uid="uid://24vagb7mrxng" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE008.png" id="318_vlf5p"]
+[ext_resource type="Texture2D" uid="uid://b6l32xup3li36" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE009.png" id="319_ffnq2"]
+[ext_resource type="Texture2D" uid="uid://ru4hik6jq3ew" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE010.png" id="320_3q7st"]
+[ext_resource type="Texture2D" uid="uid://cwhwh38tek7e3" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE011.png" id="321_0ahdv"]
+[ext_resource type="Texture2D" uid="uid://2ub5w4lu7lgy" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE012.png" id="322_c5j68"]
+[ext_resource type="Texture2D" uid="uid://22sgx32r8pv8" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE013.png" id="323_dxnt7"]
+[ext_resource type="Texture2D" uid="uid://olwe22hmmy7s" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE014.png" id="324_7abhw"]
+[ext_resource type="Texture2D" uid="uid://cno66laixqbtv" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE015.png" id="325_56o5k"]
+[ext_resource type="Texture2D" uid="uid://cuh6obv1v1vua" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE016.png" id="326_cmabt"]
+[ext_resource type="Texture2D" uid="uid://cwxawha6lk4y8" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE017.png" id="327_iys72"]
+[ext_resource type="Texture2D" uid="uid://ccu7lmdxtkv00" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE018.png" id="328_2vkfx"]
+[ext_resource type="Texture2D" uid="uid://pwawyrlx3bpw" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE019.png" id="329_yl7o7"]
+[ext_resource type="Texture2D" uid="uid://duhe4ty3xoywi" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE020.png" id="330_rxdkx"]
+[ext_resource type="Texture2D" uid="uid://dtnc3nd0iq8uy" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE021.png" id="331_nm4qs"]
+[ext_resource type="Texture2D" uid="uid://cetd0i671qkqp" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE022.png" id="332_8lix0"]
+[ext_resource type="Texture2D" uid="uid://ogmwe8q41kl2" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE023.png" id="333_ln2td"]
+[ext_resource type="Texture2D" uid="uid://cf2lprvu05vxc" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE024.png" id="334_fhmch"]
+[ext_resource type="Texture2D" uid="uid://c7u7a51nq1ssc" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE025.png" id="335_8bntl"]
+[ext_resource type="Texture2D" uid="uid://dq27qcwtsg1af" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE026.png" id="336_7xwdd"]
+[ext_resource type="Texture2D" uid="uid://bnnrq5g5bjup6" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE027.png" id="337_suj86"]
+[ext_resource type="Texture2D" uid="uid://cke4o6qqyk0q7" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE028.png" id="338_pbcp3"]
+[ext_resource type="Texture2D" uid="uid://chow8e3ewkr4j" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE029.png" id="339_jddoo"]
+[ext_resource type="Texture2D" uid="uid://dcpupy4g1ckni" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE030.png" id="340_o2ks7"]
+[ext_resource type="Texture2D" uid="uid://c6or58ho8xcbb" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE031.png" id="341_1k3sa"]
+[ext_resource type="Texture2D" uid="uid://caayct2d331vt" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE032.png" id="342_1usl7"]
+[ext_resource type="Texture2D" uid="uid://cuywynrqg0wqm" path="res://assets/fighter_actions/morgan/processed/SUPER_MOVE033.png" id="343_ty7vn"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_viu34"]
 animations = [{
@@ -1282,11 +1315,115 @@ animations = [{
 "loop": 1,
 "name": &"SUPERMOVE_GORDON",
 "speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("311_4s1qa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("312_j7sse")
+}, {
+"duration": 1.0,
+"texture": ExtResource("313_8u6vw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("314_scf8x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("315_t4ubb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("316_4tbq5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("317_j26cq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("318_vlf5p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("319_ffnq2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("320_3q7st")
+}, {
+"duration": 1.0,
+"texture": ExtResource("321_0ahdv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("322_c5j68")
+}, {
+"duration": 1.0,
+"texture": ExtResource("323_dxnt7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("324_7abhw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("325_56o5k")
+}, {
+"duration": 1.0,
+"texture": ExtResource("326_cmabt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("327_iys72")
+}, {
+"duration": 1.0,
+"texture": ExtResource("328_2vkfx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("329_yl7o7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("330_rxdkx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("331_nm4qs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("332_8lix0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("333_ln2td")
+}, {
+"duration": 1.0,
+"texture": ExtResource("334_fhmch")
+}, {
+"duration": 1.0,
+"texture": ExtResource("335_8bntl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("336_7xwdd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("337_suj86")
+}, {
+"duration": 1.0,
+"texture": ExtResource("338_pbcp3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("339_jddoo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("340_o2ks7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("341_1k3sa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("342_1usl7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("343_ty7vn")
+}],
+"loop": 1,
+"name": &"SUPERMOVE_MORGAN",
+"speed": 12.0
 }]
 
 [node name="Testingmorgan" type="Node2D" unique_id=738873973]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1284139359]
 sprite_frames = SubResource("SpriteFrames_viu34")
-animation = &"ATTACKHIGH_GORDON"
-frame_progress = 0.16810347
+animation = &"SUPERMOVE_MORGAN"
+frame_progress = 0.9464691
