@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://b33xvq7cocg71"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_kwy8s"]
+
+[resource]
+script = ExtResource("1_kwy8s")
+character_name = "Gordon"
+desc_idle = "Gordon jauntly prepares to fight"
+desc_punch = "Gordon throws a rapid punch is thrown out"
+desc_kick = "Gordon performs a strong kick by balancing on one leg"
+desc_jump = "Gordon jumps high into the air "
+desc_duck = "Gordon does a forward roll "
+desc_super = "Gordon unleashes a flurry of punches at lightning speed"
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"

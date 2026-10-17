@@ -25,6 +25,8 @@ enum State { IDLE, INPUT, RESOLUTION, ROUND_OVER, MATCH_OVER }
 
 var p1_health: int
 var p2_health: int
+var p1_data: FighterData
+var p2_data: FighterData
 var p1_super: int
 var p2_super: int
 var p1_rounds: int = 0
@@ -59,6 +61,9 @@ func _ready() -> void:
 	start_match()
 
 func start_match() -> void:
+	
+	p1_data = CharacterDB.get_fighter(CharacterDB.selected_p1)
+	p2_data = CharacterDB.get_fighter(CharacterDB.selected_p2)
 	p1_rounds = 0
 	p2_rounds = 0
 	start_round()
@@ -93,7 +98,7 @@ func _process(delta: float) -> void:
 
 	p1_status_label.text = "HP: %d | SP: %d/%d" % [p1_health, p1_super, super_charge_req]
 	p2_status_label.text = "HP: %d | SP: %d/%d" % [p2_health, p2_super, super_charge_req]
-
+	
 	
 
 func _on_phrase_recognised(phrase: String) -> void:
