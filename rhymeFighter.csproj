@@ -2,10 +2,11 @@
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Vosk" Version="0.3.38" />
-    <PackageReference Include="NAudio" Version="3.1.0" />
+    <!--<PackageReference Include="NAudio" Version="3.1.0" />-->
   </ItemGroup>
 </Project>

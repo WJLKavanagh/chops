@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://lrs7m3ocggxt"]
+
+[ext_resource type="Script" uid="uid://ooe3kmd34r8u" path="res://scripts/move_selector.gd" id="1_8jdem"]
+
+[node name="MoveSelector" type="Node2D" unique_id=1628459481]
+script = ExtResource("1_8jdem")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1043395514]
+offset_left = 1.0
+offset_top = 2.0
+offset_right = 2330.0
+offset_bottom = 1056.0
+color = Color(0.3019608, 0.09411765, 1, 1)
