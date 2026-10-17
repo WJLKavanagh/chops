@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://fqoyh0erxo71"]
+
+[ext_resource type="Script" uid="uid://lj38umgkcvj1" path="res://scripts/fight.gd" id="1_537il"]
+
+[node name="MainFight" type="Node2D" unique_id=443347459]
+script = ExtResource("1_537il")
+
+[node name="GameController" type="Node" parent="." unique_id=1919418587]
+
+[node name="Arena" type="Node2D" parent="." unique_id=604155611]
+
+[node name="FighterLeft" type="Node2D" parent="Arena" unique_id=1322321196]
+position = Vector2(209, 406)
+
+[node name="Body" type="ColorRect" parent="Arena/FighterLeft" unique_id=89704435]
+offset_left = -116.0
+offset_top = -110.0
+offset_right = 130.0
+offset_bottom = 130.0
+color = Color(1, 0, 0, 1)
+
+[node name="Label" type="Label" parent="Arena/FighterLeft" unique_id=810692213]
+offset_left = -49.0
+offset_top = -147.0
+offset_right = -9.0
+offset_bottom = -124.0
+
+[node name="FighterRight" type="Node2D" parent="Arena" unique_id=370669030]
+position = Vector2(866, 396)
+
+[node name="Body" type="ColorRect" parent="Arena/FighterRight" unique_id=402265611]
+offset_left = -107.0
+offset_top = -99.0
+offset_right = 123.0
+offset_bottom = 138.0
+color = Color(0.019607844, 0, 0.53333336, 1)
+
+[node name="Label" type="Label" parent="Arena/FighterRight" unique_id=360682001]
+offset_left = -30.0
+offset_top = -125.0
+offset_right = 10.0
+offset_bottom = -102.0
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=1541469455]
+
+[node name="StatusLabel" type="Label" parent="UI" unique_id=2098181404]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LeftHPLabel" type="Label" parent="UI" unique_id=1887912732]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="RightHPLabel" type="Label" parent="UI" unique_id=921296151]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="LeftSMLabel" type="Label" parent="UI" unique_id=1850124099]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="RightSMLabel" type="Label" parent="UI" unique_id=443069656]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="InputManager" type="Node" parent="." unique_id=448316252]
