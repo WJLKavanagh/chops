@@ -20,6 +20,9 @@ enum State { IDLE, INPUT, RESOLUTION, ROUND_OVER, MATCH_OVER }
 @onready var p1_status_label = $Arena/FighterLeft/HealthAndCharge
 @onready var p2_status_label = $Arena/FighterRight/HealthAndCharge
 
+#TTS Autoloader connection, YAY!
+@onready var tts = get_node("/root/TTS_Manager")
+
 var p1_health: int
 var p2_health: int
 var p1_super: int
@@ -31,6 +34,7 @@ var p1_move: Move = Move.NONE
 var p2_move: Move = Move.NONE
 var current_state: State = State.IDLE
 var time_remaining: float = 0.0
+var is_tts_prompting: bool = false #Is TTS prompting/running? Stop loop timer.
 
 var move_dict = {
 	"high attack": Move.HIGH_ATK,
