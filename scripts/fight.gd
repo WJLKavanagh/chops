@@ -66,6 +66,9 @@ func start_match() -> void:
 	p2_data = CharacterDB.get_fighter(CharacterDB.selected_p2)
 	p1_rounds = 0
 	p2_rounds = 0
+	
+	tts.queue_text(p1_data.character_name + " versus " + p2_data.character_name + ".", 1)
+	tts.queue_text("Round start, Fight!")
 	start_round()
 
 func start_round() -> void:
@@ -73,6 +76,10 @@ func start_round() -> void:
 	p2_health = max_health
 	p1_super = 0
 	p2_super = 0
+	
+	if tts.is_speaking:
+		await tts.tts_queue_fnished
+		
 	start_input_phase()
 
 func start_input_phase() -> void:

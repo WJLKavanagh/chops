@@ -1,11 +1,8 @@
 extends Node
 
-@export var leftColour: Color = Color.PALE_VIOLET_RED
-@export var rightColour: Color = Color.AQUAMARINE
-@export var mainColour: Color = Color.DARK_ORANGE
+@export var colourQueue = [Color.RED,Color.ORANGE,Color.YELLOW,Color.GREEN,Color.BLUE,Color.INDIGO,Color.VIOLET]
+var queuePointer:int = 0
 
-#@export var movementSpeed: float = 1
-#@export var scaleSpeed: float = 0.1
 @export var movementTime: float = 0.5
 
 @onready var characterDockLeft = $characterL
@@ -13,6 +10,8 @@ extends Node
 @onready var characterDockMain = $characterMain
 @onready var characterDockOffScreenR = $characterOffScreenR
 @onready var characterDockOffScreenL = $characterOffScreenL
+
+var dockList
 
 var leftPos: Transform2D
 var rightPos: Transform2D
@@ -23,6 +22,15 @@ var offScreenLPos: Transform2D
 var mainScale: Vector2 = Vector2(1,1)
 var nonMainScale: Vector2 = Vector2(0.8,0.8)
 
+var moving:bool = false
+
+var commandDict = {
+	"left": "left",
+	"right": "right",
+	"next": "right",
+	"back":"left"
+}
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	leftPos = characterDockLeft.get_transform()
@@ -30,23 +38,45 @@ func _ready() -> void:
 	mainPos = characterDockMain.get_transform()
 	offScreenRPos = characterDockOffScreenR.get_transform()
 	offScreenLPos = characterDockOffScreenL.get_transform()
-	pass # Replace with function body.
+	
+	dockList = [characterDockOffScreenL, characterDockLeft, characterDockMain, characterDockRight, characterDockOffScreenR]
+	
+	_changeImages()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if(Input.is_action_just_pressed("testRight")):
+	if(Input.is_action_just_pressed("testRight")&&!moving):
+		moving = true
+		queuePointer-=1
+		if queuePointer==-1:
+			queuePointer = colourQueue.size()-1
 		_moveAllDocksRight()
-	pass
+	elif (Input.is_action_just_pressed("testLeft")&&!moving):
+		moving = true
+		queuePointer+=1
+		if queuePointer==colourQueue.size():
+			queuePointer = 0
+		_moveAllDocksLeft()
 	
 func _moveAllDocksLeft():
-	var lTween = get_tree().create_tween()
-	var rTween = get_tree().create_tween()
-	var offRTween = get_tree().create_tween()
-	var mainTween = get_tree().create_tween()
-	
-	#if (_moveEachDock(characterDockLeft, lTween, nonMainScale, offScreenLPos.origin) && _moveEachDock(characterDockMain, mainTween, nonMainScale, leftPos.origin) && _moveEachDock(characterDockRight, rTween, mainScale, mainPos.origin) && _moveEachDock(characterDockOffScreenR, offRTween, nonMainScale, rightPos.origin)):
-	#	_resetMove()
-	pass
+	var tween := create_tween()
+	tween.set_parallel(true)
+
+	tween.tween_property(characterDockLeft, "position", offScreenLPos.origin, movementTime)
+	tween.tween_property(characterDockLeft, "scale", nonMainScale, movementTime)
+
+	tween.tween_property(characterDockMain, "position", leftPos.origin, movementTime)
+	tween.tween_property(characterDockMain, "scale", nonMainScale, movementTime)
+
+	tween.tween_property(characterDockRight, "position", mainPos.origin, movementTime)
+	tween.tween_property(characterDockRight, "scale", mainScale, movementTime)
+
+	tween.tween_property(characterDockOffScreenR, "position", rightPos.origin, movementTime)
+	tween.tween_property(characterDockOffScreenR, "scale", nonMainScale, movementTime)
+
+	await tween.finished
+	print("Move finished")
+	_resetMove()
 	
 func _moveAllDocksRight():
 	var tween := create_tween()
@@ -68,37 +98,20 @@ func _moveAllDocksRight():
 	print("Move finished")
 	_resetMove()
 
-	## former
-	# var lTween = get_tree().create_tween()
-	# var rTween = get_tree().create_tween()
-	# var offLTween = get_tree().create_tween()
-	# var mainTween = get_tree().create_tween()
-	
-	# var lTweens = get_tree().create_tween()
-	# var rTweens = get_tree().create_tween()
-	# var offLTweens = get_tree().create_tween()
-	# var mainTweens = get_tree().create_tween()
-	
-	# var moveL:bool = _moveEachDock(characterDockLeft, lTween, lTweens, mainScale, mainPos.origin)
-	# var moveR:bool = _moveEachDock(characterDockRight, rTween, rTweens, nonMainScale, offScreenRPos.origin)
-	# var moveMain:bool = _moveEachDock(characterDockMain, mainTween, mainTweens, nonMainScale, rightPos.origin)
-	# var moveOffL:bool = _moveEachDock(characterDockOffScreenL, offLTween, offLTweens, nonMainScale, leftPos.origin)
-	
-	# if (moveL && moveR && moveMain && moveOffL):
-	# 	print(3)
-	# 	_resetMove()
-	# pass
-	
 func _moveEachDock(dock,tween:Tween,tweens:Tween,scale:Vector2,position:Vector2,):
 	tween.tween_property(dock, "position", position, movementTime)
 	tweens.tween_property(dock, "scale", scale, movementTime)
-	#tween.tween_callback(dock.)
 	
 	if (tween.finished):
 		return true
 	return false
 	
-func _changeImage(characterDock):
+func _changeImages():
+	for a in range(0,5):
+		var index = queuePointer+a
+		if(index>=colourQueue.size()):
+			index-=colourQueue.size()
+		dockList[a].color = colourQueue[index]
 	#	Put image change here when image, for now, colour change
 	pass
 	
@@ -115,4 +128,9 @@ func _resetDocks(dockToReset, position:Transform2D):
 	print("resetting")
 	dockToReset.position = position.origin
 	dockToReset.scale = position.get_scale()
-
+<<<<<<< HEAD
+=======
+	
+	moving = false
+	_changeImages()
+>>>>>>> d57f54892a0bd06a87c150986f2b63b5637488de
