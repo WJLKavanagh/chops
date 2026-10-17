@@ -134,8 +134,8 @@ func process_queue() -> void:
 		voice_manager.StopListening()
 
 	var text_to_speak = message_queue.pop_front()
-	DisplayServer.tts_speak(text_to_speak, voice_id, 50, 1.0, 1.0)
-
+	DisplayServer.tts_speak(text_to_speak, voice_id, 50, 1.0, 1.5)
+#SLOW IS Speed 1, Normal 1.8, Fast 2.2, Extra Fast 2.6 Super Fast 3.2
 # func _on_completion_poll() -> void:
 # 	if not DisplayServer.tts_is_speaking():
 # 		completion_timer.stop()

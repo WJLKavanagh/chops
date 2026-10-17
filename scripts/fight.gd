@@ -37,10 +37,10 @@ var time_remaining: float = 0.0
 var is_tts_prompting: bool = false #Is TTS prompting/running? Stop loop timer.
 
 var move_dict = {
-	"high attack": Move.HIGH_ATK,
-	"low attack": Move.LOW_ATK,
-	"high block": Move.HIGH_BLK,
-	"low block": Move.LOW_BLK,
+	"punch": Move.HIGH_ATK,
+	"kick": Move.LOW_ATK,
+	"duck": Move.HIGH_BLK,
+	"jump": Move.LOW_BLK,
 	"super move": Move.SUPER
 }
 
@@ -129,10 +129,10 @@ func generate_ai_move() -> Move:
 func get_move_name(move_enum: Move) -> String:
 	match move_enum:
 		Move.NONE: return "nothing"
-		Move.HIGH_ATK: return "High Attack"
-		Move.LOW_ATK: return "Low Attack"
-		Move.HIGH_BLK: return "High Block"
-		Move.LOW_BLK: return "Low Block"
+		Move.HIGH_ATK: return "Punch"
+		Move.LOW_ATK: return "Kick"
+		Move.HIGH_BLK: return "Duck"
+		Move.LOW_BLK: return "Jump"
 		Move.SUPER: return "Supermove"
 	return "Unknown Move"
 

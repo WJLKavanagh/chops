@@ -15,8 +15,8 @@ func _ready() -> void:
 	add_child(audio_player)
 	audio_player.volume_db = normal_volume_db
 
-	if menu_music:
-		play_track(menu_music)
+	#if menu_music:
+		#play_track(menu_music)
 
 	call_deferred("_connect_listeners")
 
