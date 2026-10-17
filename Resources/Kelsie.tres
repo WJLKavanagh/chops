@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://cyr62gcwe7x4c"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_cq4j1"]
+
+[resource]
+script = ExtResource("1_cq4j1")
+character_name = "Kelsie"
+desc_idle = "Kelsie Stands ready to fight"
+desc_punch = "Kelsie Punches"
+desc_kick = "Kelsie Kicks"
+desc_jump = "Kelsie Jumps"
+desc_duck = "Kelsie Ducks"
+desc_super = "Kelsie Unleashes super"
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"

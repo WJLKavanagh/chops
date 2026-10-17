@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="FighterData" format=3 uid="uid://feh5kfmn46np"]
+
+[ext_resource type="Script" uid="uid://ci0nm2pnf56yb" path="res://scripts/FighterData.gd" id="1_kgp2v"]
+
+[resource]
+script = ExtResource("1_kgp2v")
+character_name = "Cari"
+desc_idle = "Cari prepares to fight"
+desc_punch = "Cari throws a rapid punch "
+desc_kick = "Cari Kicks"
+desc_jump = "Cari Jumps"
+desc_duck = "Cari Ducks"
+desc_super = "Cari unleashes a super"
+metadata/_custom_type_script = "uid://ci0nm2pnf56yb"
