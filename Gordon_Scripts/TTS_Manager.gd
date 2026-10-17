@@ -47,7 +47,9 @@ func OnTimerTimeout() -> void:
 			if element.is_in_group("tts_loop") or ("is_looping" in element and element.is_looping):
 				force_loop = true
 			
-			
+			#Attemping to stop TTS from speaking voids in the text. Will this manifest, who knows?
+			if current_screen_text.strip_edges() == "":
+				return
 			
 				
 			
