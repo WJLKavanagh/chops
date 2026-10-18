@@ -20,6 +20,10 @@ const PLACEHOLDER_COLORS: Array[Color] = [
 	Color(0.23, 0.37, 0.31)
 ]
 const VOICE_COMMANDS: PackedStringArray = ["next", "previous", "lock in"]
+const MOVE_VARIATIONS_PATH := "res://Resources/MoveVariations.json"
+const MOVE_ORDER: Array[String] = ["high_attack", "low_attack", "high_block", "low_block", "super_move"]
+const MOVE_LABELS: Array[String] = ["high attack", "low attack", "high block", "low block", "super move"]
+const CONFIRMATION_PANEL_COLOR := Color(0.035, 0.055, 0.09, 0.94)
 
 @export var movementTime: float = 0.5
 
@@ -45,8 +49,14 @@ var _bark_player: AudioStreamPlayer
 var _awaiting_command: bool = false
 var _locked_in: bool = false
 var _idle_animations: Dictionary = {}
+var _move_variations: Dictionary = {}
+var _selected_move_names: PackedStringArray = PackedStringArray()
+var _move_confirmation_index: int = 0
+var _confirmation_prompt_label: Label
+var _confirmation_progress_label: Label
 
 func _ready() -> void:
+	randomize()
 	tts_manager.set_listening_enabled(false)
 	if not VoiceManager.PhraseRecognised.is_connected(_on_phrase_recognised):
 		VoiceManager.PhraseRecognised.connect(_on_phrase_recognised)
@@ -67,6 +77,7 @@ func _ready() -> void:
 	mainScale = mainPos.get_scale()
 	nonMainScale = leftPos.get_scale()
 	_load_idle_animations()
+	_move_variations = _load_move_variations()
 	_setup_character_panels()
 	_changeImages()
 	_announce_selection()
@@ -298,7 +309,11 @@ func _announce_selection() -> void:
 	VoiceManager.StartListening()
 
 func _on_phrase_recognised(phrase: String) -> void:
-	if not _awaiting_command or moving or _locked_in:
+	if not _awaiting_command or moving:
+		return
+
+	if _locked_in:
+		_handle_move_confirmation(phrase)
 		return
 
 	var command := phrase.strip_edges().to_lower()
@@ -318,8 +333,9 @@ func _on_phrase_recognised(phrase: String) -> void:
 
 func _lock_in_selection() -> void:
 	var character_name: String = CHARACTERS[queuePointer]["name"]
-	if character_name != "Gordon":
-		tts_manager.queue_text("Only Gordon is available right now. Select Gordon and say lock in.", 1) #THANK YOU for this comment, I was spending a while there (2 mins) trying to figure out why no one was selecting haha
+	if _move_variations.is_empty() or not _move_variations.has(character_name):
+		push_error("CharacterSelect: Move variations are unavailable for %s." % character_name)
+		tts_manager.queue_text("Move names are unavailable for this character. Please try another character.", 1)
 		await tts_manager.tts_queue_finished
 		_announce_selection()
 		return
@@ -331,4 +347,163 @@ func _lock_in_selection() -> void:
 	else:
 		CharacterDB.selected_p2 = character_name
 	NetworkManager.submit_character(character_name)
+	_prepare_move_confirm_screen()
 	tts_manager.queue_text("%s locked in." % character_name, 1)
+	await tts_manager.tts_queue_finished
+	_announce_move_confirmation()
+
+func _load_move_variations() -> Dictionary:
+	if not FileAccess.file_exists(MOVE_VARIATIONS_PATH):
+		push_error("CharacterSelect: Move variation data not found at %s." % MOVE_VARIATIONS_PATH)
+		return {}
+
+	var file := FileAccess.open(MOVE_VARIATIONS_PATH, FileAccess.READ)
+	if file == null:
+		push_error("CharacterSelect: Could not open move variation data at %s." % MOVE_VARIATIONS_PATH)
+		return {}
+
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	if not parsed is Dictionary:
+		push_error("CharacterSelect: Move variation data must contain a JSON object.")
+		return {}
+
+	for character in CHARACTERS:
+		var character_name: String = character["name"]
+		if not parsed.has(character_name) or not parsed[character_name] is Dictionary:
+			push_error("CharacterSelect: Move variations are missing for %s." % character_name)
+			return {}
+		for move_key in MOVE_ORDER:
+			var variations: Variant = parsed[character_name].get(move_key)
+			if not variations is Array or variations.size() != 2:
+				push_error("CharacterSelect: %s must have exactly two variations for %s." % [character_name, move_key])
+				return {}
+			for variation in variations:
+				if not variation is String or variation.strip_edges().is_empty():
+					push_error("CharacterSelect: %s has an invalid variation for %s." % [character_name, move_key])
+					return {}
+
+	return parsed
+
+func _prepare_move_confirm_screen() -> void:
+	for dock in [characterDockOffScreenL, characterDockLeft, characterDockRight, characterDockOffScreenR]:
+		dock.hide()
+
+	characterDockMain.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	characterDockMain.position = Vector2.ZERO
+	characterDockMain.size = Vector2(680.0, 1080.0)
+	characterDockMain.scale = Vector2.ONE
+	characterDockMain.pivot_offset = characterDockMain.size * 0.5
+	characterDockMain.color = Color(1, 1, 1, 0)
+
+	var portrait := characterDockMain.get_node("Portrait") as TextureRect
+	portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var idle_sprite := characterDockMain.get_node("IdleAnimation") as AnimatedSprite2D
+	var fallback_sprite := characterDockMain.get_node("FallbackSprite") as Sprite2D
+	var name_label := characterDockMain.get_node("Name") as Label
+	idle_sprite.position = characterDockMain.size * 0.5
+	fallback_sprite.position = characterDockMain.size * 0.5
+	name_label.add_theme_font_size_override("font_size", 54)
+	name_label.offset_top = -110.0
+	name_label.offset_bottom = -25.0
+
+	if idle_sprite.visible and idle_sprite.sprite_frames != null:
+		var frame := idle_sprite.sprite_frames.get_frame_texture(idle_sprite.animation, 0)
+		if frame != null:
+			idle_sprite.scale = Vector2.ONE * (characterDockMain.size.y * 0.92 / frame.get_height())
+			idle_sprite.offset = _get_visual_center_offset(frame)
+	elif fallback_sprite.visible and fallback_sprite.texture != null:
+		fallback_sprite.scale = Vector2.ONE * (characterDockMain.size.y * 0.92 / fallback_sprite.texture.get_height())
+		fallback_sprite.offset = _get_visual_center_offset(fallback_sprite.texture)
+
+	var panel := ColorRect.new()
+	panel.name = "MoveConfirmationPanel"
+	panel.position = Vector2(680.0, 0.0)
+	panel.size = Vector2(1240.0, 1080.0)
+	panel.color = CONFIRMATION_PANEL_COLOR
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+
+	var heading := Label.new()
+	heading.text = "MOVE CONFIRMATION"
+	heading.position = Vector2(110.0, 190.0)
+	heading.size = Vector2(1000.0, 90.0)
+	heading.add_theme_font_size_override("font_size", 48)
+	heading.add_theme_color_override("font_color", Color(0.64, 0.86, 1.0))
+	panel.add_child(heading)
+
+	_confirmation_progress_label = Label.new()
+	_confirmation_progress_label.position = Vector2(110.0, 315.0)
+	_confirmation_progress_label.size = Vector2(1000.0, 70.0)
+	_confirmation_progress_label.add_theme_font_size_override("font_size", 36)
+	_confirmation_progress_label.add_theme_color_override("font_color", Color(0.82, 0.87, 0.94))
+	panel.add_child(_confirmation_progress_label)
+
+	_confirmation_prompt_label = Label.new()
+	_confirmation_prompt_label.position = Vector2(110.0, 430.0)
+	_confirmation_prompt_label.size = Vector2(1000.0, 260.0)
+	_confirmation_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_confirmation_prompt_label.add_theme_font_size_override("font_size", 54)
+	_confirmation_prompt_label.add_theme_color_override("font_color", Color.WHITE)
+	panel.add_child(_confirmation_prompt_label)
+
+	var instruction := Label.new()
+	instruction.text = "Say the move name to confirm it."
+	instruction.position = Vector2(110.0, 760.0)
+	instruction.size = Vector2(1000.0, 80.0)
+	instruction.add_theme_font_size_override("font_size", 34)
+	instruction.add_theme_color_override("font_color", Color(0.72, 0.78, 0.86))
+	panel.add_child(instruction)
+
+	_selected_move_names.clear()
+	var character_moves: Dictionary = _move_variations[CHARACTERS[queuePointer]["name"]]
+	for move_key in MOVE_ORDER:
+		var variations: Array = character_moves[move_key]
+		_selected_move_names.append(variations[randi_range(0, variations.size() - 1)].strip_edges().to_lower())
+
+func _announce_move_confirmation() -> void:
+	if _move_confirmation_index >= MOVE_ORDER.size():
+		_finish_move_confirmation()
+		return
+
+	var move_label: String = MOVE_LABELS[_move_confirmation_index]
+	var move_name: String = _selected_move_names[_move_confirmation_index]
+	var character_name: String = CHARACTERS[queuePointer]["name"]
+	var prompt := "%s's %s is called %s, say %s to confirm." % [character_name, move_label, move_name, move_name]
+	_confirmation_progress_label.text = "Move %d of %d" % [_move_confirmation_index + 1, MOVE_ORDER.size()]
+	_confirmation_prompt_label.text = prompt
+	_awaiting_command = false
+	tts_manager.set_listening_enabled(false)
+	VoiceManager.StopListening()
+	VoiceManager.SetGrammar(PackedStringArray([move_name]))
+	tts_manager.queue_text(prompt, 1)
+	await tts_manager.tts_queue_finished
+
+	if not _locked_in or _move_confirmation_index >= MOVE_ORDER.size():
+		return
+
+	_awaiting_command = true
+	tts_manager.set_listening_enabled(true)
+	VoiceManager.StartListening()
+
+func _finish_move_confirmation() -> void:
+	_awaiting_command = false
+	tts_manager.set_listening_enabled(false)
+	VoiceManager.StopListening()
+	VoiceManager.SetGrammar(_selected_move_names)
+	_confirmation_progress_label.text = "All five move names confirmed."
+	_confirmation_prompt_label.text = "Waiting for the other player to finish..."
+	NetworkManager.submit_moves(_selected_move_names)
+	NetworkManager.set_ready(true)
+
+func _handle_move_confirmation(phrase: String) -> void:
+	_awaiting_command = false
+	tts_manager.set_listening_enabled(false)
+	VoiceManager.StopListening()
+
+	var expected_name: String = _selected_move_names[_move_confirmation_index]
+	if phrase.strip_edges().to_lower() != expected_name:
+		_announce_move_confirmation()
+		return
+
+	_move_confirmation_index += 1
+	_announce_move_confirmation()

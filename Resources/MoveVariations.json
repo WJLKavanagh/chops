@@ -1,0 +1,37 @@
+{
+  "Gordon": {
+    "high_attack": ["iron fist", "storm punch"],
+    "low_attack": ["sweeping kick", "ground breaker"],
+    "high_block": ["sky guard", "iron shield"],
+    "low_block": ["low stance", "stone crouch"],
+    "super_move": ["thunder rush", "final barrage"]
+  },
+  "Morgan": {
+    "high_attack": ["wild strike", "hawk punch"],
+    "low_attack": ["ankle breaker", "rapid sweep"],
+    "high_block": ["eagle guard", "high shelter"],
+    "low_block": ["deep crouch", "grounded guard"],
+    "super_move": ["comet crash", "wild storm"]
+  },
+  "Cari": {
+    "high_attack": ["bright impact", "star punch"],
+    "low_attack": ["quick sweep", "low impact"],
+    "high_block": ["radiant guard", "upper shield"],
+    "low_block": ["steady crouch", "low shelter"],
+    "super_move": ["nova burst", "starlight storm"]
+  },
+  "James": {
+    "high_attack": ["heavy swing", "steel punch"],
+    "low_attack": ["side sweep", "heavy kick"],
+    "high_block": ["solid guard", "steel wall"],
+    "low_block": ["ground hold", "side crouch"],
+    "super_move": ["maximum force", "steel cyclone"]
+  },
+  "Kellie": {
+    "high_attack": ["quick jab", "swift strike"],
+    "low_attack": ["flash kick", "swift sweep"],
+    "high_block": ["flash guard", "quick shield"],
+    "low_block": ["light crouch", "quick shelter"],
+    "super_move": ["flash barrage", "swift cyclone"]
+  }
+}

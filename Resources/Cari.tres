@@ -6,7 +6,7 @@
 script = ExtResource("1_kgp2v")
 character_name = "Cari"
 desc_idle = "Cari prepares to fight"
-desc_punch = "Cari throws a rapid punch "
+desc_punch = "Cari throws a rapid punch"
 desc_kick = "Cari Kicks"
 desc_jump = "Cari Jumps"
 desc_duck = "Cari Ducks"

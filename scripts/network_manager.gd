@@ -5,14 +5,13 @@ signal player_data_updated(peer_id: int)
 signal phase_complete(next_scene_path: String)
 
 const PORT = 54321	# TODO: Confirm this port later on.
-const SUPPORTED_CHARACTERS: PackedStringArray = ["Gordon"]
+const SUPPORTED_CHARACTERS: PackedStringArray = ["Cari", "Gordon", "Kellie", "Morgan", "James"]
 const CHARACTER_SELECT_SCENE := "res://scenes/characterSelectScene.tscn"
-const MOVE_SELECTOR_SCENE := "res://scenes/move_selector.tscn"
+const REQUIRED_MOVE_COUNT := 5
 @export var target_ip: String = "127.0.0.1" # TODO: This is set to localhost for now
 
 var _peer = ENetMultiplayerPeer.new()
 var _character_select_transition_started: bool = false
-var _move_selector_transition_started: bool = false
 
 # The central data blob. Keys are peer IDs (1 for host, dynamically generated for client).
 # Values are dictionaries holding the player's current state and choices.
@@ -90,6 +89,9 @@ func submit_character(char_id: String) -> void:
 	rpc("_rpc_update_character", char_id)
 
 func submit_moves(moves: PackedStringArray) -> void:
+	if moves.size() != REQUIRED_MOVE_COUNT:
+		push_error("NetworkManager: Expected exactly %d confirmed move names." % REQUIRED_MOVE_COUNT)
+		return
 	rpc("_rpc_update_moves", moves)
 
 func set_ready(ready_state: bool) -> void:
@@ -112,10 +114,17 @@ func _rpc_update_character(char_id: String) -> void:
 	else:
 		CharacterDB.selected_p2 = normalized_char_id
 	player_data_updated.emit(sender_id)
-	_check_character_selection_complete()
 
 @rpc("any_peer", "call_local", "reliable")
 func _rpc_update_moves(moves: PackedStringArray) -> void:
+	if moves.size() != REQUIRED_MOVE_COUNT:
+		push_warning("NetworkManager: Rejected move list with %d entries." % moves.size())
+		return
+	for move_name in moves:
+		if move_name.strip_edges().is_empty():
+			push_warning("NetworkManager: Rejected a move list containing an empty name.")
+			return
+
 	var sender_id := _get_rpc_sender_id()
 	_ensure_player_data(sender_id)
 	session_data[sender_id]["move_names"] = moves
@@ -138,20 +147,6 @@ func _ensure_player_data(peer_id: int) -> void:
 	if not session_data.has(peer_id):
 		_initialise_player_data(peer_id)
 
-func _check_character_selection_complete() -> void:
-	if not multiplayer.is_server() or _move_selector_transition_started:
-		return
-	if session_data.size() < 2:
-		return
-
-	for peer_id in session_data:
-		var char_id: String = session_data[peer_id]["character_id"]
-		if not SUPPORTED_CHARACTERS.has(char_id):
-			return
-
-	_move_selector_transition_started = true
-	rpc("_rpc_transition_scene", MOVE_SELECTOR_SCENE)
-
 func _check_phase_completion() -> void:
 	# Only the host dictates scene transitions to prevent race conditions
 	if not multiplayer.is_server():
@@ -167,20 +162,16 @@ func _check_phase_completion() -> void:
 			break
 			
 	if all_ready:
-		# Reset readiness for the next phase
+		for peer_id in session_data.keys():
+			var move_names: PackedStringArray = session_data[peer_id]["move_names"]
+			if not SUPPORTED_CHARACTERS.has(session_data[peer_id]["character_id"]) or move_names.size() != REQUIRED_MOVE_COUNT:
+				push_warning("NetworkManager: Cannot start the match until every player selects a character and confirms five moves.")
+				return
+
 		for peer_id in session_data.keys():
 			session_data[peer_id]["is_ready"] = false
-		
-		# Define your scene flow here based on current state
-		var next_scene = ""
-		if session_data[1]["character_id"] == "":
-			next_scene = CHARACTER_SELECT_SCENE
-		elif session_data[1]["move_names"].size() == 0:
-			next_scene = MOVE_SELECTOR_SCENE
-		else:
-			next_scene = "res://scenes/fight.tscn"
-			
-		rpc("_rpc_transition_scene", next_scene)
+
+		rpc("_rpc_transition_scene", "res://scenes/fight.tscn")
 
 @rpc("authority", "call_local", "reliable")
 func _rpc_transition_scene(scene_path: String) -> void:
