@@ -10,6 +10,11 @@ script = ExtResource("1_537il")
 
 [node name="Arena" type="Node2D" parent="." unique_id=604155611]
 
+[node name="foreground" type="Sprite2D" parent="Arena" unique_id=579353374]
+position = Vector2(962.49994, 541)
+scale = Vector2(1.0067708, 1.0185187)
+texture = ExtResource("2_htrw1")
+
 [node name="FighterLeft" type="Node2D" parent="Arena" unique_id=1322321196]
 position = Vector2(532, 560)
 
@@ -26,6 +31,7 @@ offset_right = -450.0
 offset_bottom = -132.0
 
 [node name="HealthAndCharge" type="Label" parent="Arena/FighterLeft" unique_id=993343243]
+visible = false
 offset_left = -69.0
 offset_top = 138.0
 offset_right = 89.0
@@ -39,44 +45,45 @@ position = Vector2(-134, -38)
 scale = Vector2(8, 8)
 
 [node name="Label" type="Label" parent="Arena/FighterRight" unique_id=360682001]
+visible = false
 offset_left = -66.0
 offset_top = -413.0
 offset_right = -26.0
 offset_bottom = -390.0
 
 [node name="HealthAndCharge" type="Label" parent="Arena/FighterRight" unique_id=125538257]
+visible = false
 offset_left = 357.0
 offset_top = -308.0
 offset_right = 515.0
 offset_bottom = -273.0
-metadata/_edit_use_anchors_ = true
-
-[node name="foreground" type="Sprite2D" parent="Arena" unique_id=579353374]
-position = Vector2(962.49994, 541)
-scale = Vector2(1.0067708, 1.0185187)
-texture = ExtResource("2_htrw1")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1541469455]
 
 [node name="StatusLabel" type="Label" parent="UI" unique_id=2098181404]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="LeftHPLabel" type="Label" parent="UI" unique_id=1887912732]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="RightHPLabel" type="Label" parent="UI" unique_id=921296151]
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="LeftSMLabel" type="Label" parent="UI" unique_id=1850124099]
+visible = false
 offset_left = 182.0
 offset_top = 104.0
 offset_right = 222.0
 offset_bottom = 127.0
 
 [node name="RightSMLabel" type="Label" parent="UI" unique_id=443069656]
+visible = false
 offset_left = 813.0
 offset_top = 116.0
 offset_right = 853.0
