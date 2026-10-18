@@ -57,7 +57,7 @@ func _ready() -> void:
 		# Connect using the exact PascalCase string emitted by C#
 		if not vm.is_connected("PhraseRecognised", Callable(self, "_on_phrase_recognised")):
 			vm.connect("PhraseRecognised", Callable(self, "_on_phrase_recognised"))
-		if  not vm.PartialPhraseRecognised.is_connected(_on_partial_recognised):
+		if not vm.PartialPhraseRecognised.is_connected(_on_partial_recognised):
 			vm.PartialPhraseRecognised.connect(_on_partial_recognised)
 			
 		var grammar:= PackedStringArray(move_dict.keys())
@@ -205,7 +205,7 @@ func _on_phrase_recognised(phrase: String) -> void:
 	var sorted_keys = move_dict.keys().duplicate()
 	sorted_keys.sort_custom(func(a, b): return a.length() > b.length())
 	
-	for key in move_dict.keys():
+	for key in sorted_keys:
 		if key in phrase:
 			_lock_in_move(key)
 			return
@@ -427,8 +427,8 @@ func end_match() -> void:
 	current_state = State.MATCH_OVER
 	status_label.text = "MATCH OVER"
 	
-	#if has_node("/root/VoiceManager"):
-		#get_node("/root/VoiceManager").StopListening()
+	if has_node("/root/VoiceManager"):
+		get_node("/root/VoiceManager").StopListening()
 		
 	var local_won: bool = false
 	if p1_rounds >= 2 and local_is_p1:
