@@ -13,6 +13,7 @@ config_version=5
 config/name="rhymeFighter"
 run/main_scene="uid://cetsadgj3xag2"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
+boot_splash/image="uid://byismveykqii3"
 config/icon="res://icon.svg"
 
 [audio]
