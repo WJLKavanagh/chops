@@ -15,6 +15,8 @@ public partial class VoiceManager : Node
 	[Signal] public delegate void PhraseAlternativesRecognisedEventHandler(string[] phrases);
 	[Signal] public delegate void PartialPhraseRecognisedEventHandler(string phrase);
 	[Signal] public delegate void StatusChangedEventHandler(bool isListening);
+	[Signal] public delegate void GrammarUpdatedEventHandler(string[] phrases);
+	[Signal] public delegate void GrammarUpdateFailedEventHandler(string[] phrases, string error);
 
 	[Export] public string ModelPath = "res://vosk/vosk-model-en-us-0.22-lgraph";
 	[Export] public bool LogRecognitionResults = true;
@@ -23,6 +25,8 @@ public partial class VoiceManager : Node
 	private Model _model;
 	private VoskRecognizer _recognizer;
 	private readonly object _recognizerLock = new();
+	private readonly object _grammarStateLock = new();
+	private readonly object _grammarBuildLock = new();
 	private WaveInEvent _waveIn;
 	private AudioStreamPlayer _recordingStartPlayer;
 	private AudioStreamPlayer _recordingEndPlayer;
@@ -33,6 +37,7 @@ public partial class VoiceManager : Node
 	private bool _isDebugBuild = false;
 	private string _lastLoggedPartial = string.Empty;
 	private string[] _currentGrammar = Array.Empty<string>();
+	private int _grammarVersion;
 
 	public override void _Ready()
 	{
@@ -114,56 +119,106 @@ public partial class VoiceManager : Node
 	//UMMM okay, let's see, if the grammar is same as before IGNORE whatever command it is, should stop the roundel freeze mayhaps as it shouldn't spike CPU. Then I think just vosk in background thread too? Will this fuck up the network ver, it shouldn't I don't think but double check after.  
 	public void SetGrammar(string[] phrases)
 	{
-		string[] grammarPhrases = phrases ?? Array.Empty<string>();
-		
-		if (_currentGrammar.SequenceEqual(grammarPhrases))
+		string[] grammarPhrases = (phrases ?? Array.Empty<string>())
+			.Select(phrase => phrase?.Trim().ToLowerInvariant() ?? string.Empty)
+			.Where(phrase => !string.IsNullOrWhiteSpace(phrase))
+			.Distinct(StringComparer.Ordinal)
+			.ToArray();
+		int grammarVersion;
+
+		lock (_grammarStateLock)
 		{
-			return; //Caps, uncaps, caps, noodles
+			if (_currentGrammar.SequenceEqual(grammarPhrases, StringComparer.Ordinal))
+			{
+				return;
+			}
+
+			_currentGrammar = grammarPhrases;
+			grammarVersion = ++_grammarVersion;
 		}
-		
-		//OMFG, Might help if I actually save the updated grammar before rebuilding it lmao
-		_currentGrammar = grammarPhrases;
-		
-		//Background thread start
+
 		System.Threading.Tasks.Task.Run(() =>
 		{
-			VoskRecognizer replacement;
-			
-			if (grammarPhrases.Length == 0)
+			lock (_grammarBuildLock)
 			{
-				replacement = new VoskRecognizer(_model, 16000.0f);
+				lock (_grammarStateLock)
+				{
+					if (grammarVersion != _grammarVersion)
+					{
+						return;
+					}
+				}
+
+				try
+				{
+					VoskRecognizer replacement;
+					if (grammarPhrases.Length == 0)
+					{
+						replacement = new VoskRecognizer(_model, 16000.0f);
+					}
+					else
+					{
+						string grammarJson = JsonSerializer.Serialize(grammarPhrases.Concat(new[] { "[unk]" }));
+						replacement = new VoskRecognizer(_model, 16000.0f, grammarJson);
+					}
+
+					replacement.SetWords(true);
+					replacement.SetPartialWords(true);
+					replacement.SetMaxAlternatives(3);
+
+					lock (_grammarStateLock)
+					{
+						if (grammarVersion != _grammarVersion)
+						{
+							replacement.Dispose();
+							return;
+						}
+
+						lock (_recognizerLock)
+						{
+							VoskRecognizer previous = _recognizer;
+							_recognizer = replacement;
+							previous?.Dispose();
+						}
+					}
+
+					CallDeferred(nameof(PrintGrammarUpdated), grammarPhrases);
+				}
+				catch (Exception exception)
+				{
+					CallDeferred(nameof(ReportGrammarUpdateFailure), grammarPhrases, exception.Message);
+				}
 			}
-			else
-			{
-				// Restricted grammar mode. [unk] handles out-of-grammar noise.
-				string grammarJson = JsonSerializer.Serialize(grammarPhrases.Concat(new[] { "[unk]" }));
-				replacement = new VoskRecognizer(_model, 16000.0f, grammarJson);
-			}
-			
-			replacement.SetWords(true);
-			replacement.SetPartialWords(true);
-			replacement.SetMaxAlternatives(3);
-			
-			VoskRecognizer previous; //Pretty much same as it used to be.
-			
-			//Okay, now locking the thread for a milisecond to get the pointer swapped. I'll just keep the old spelling from here before.
-			lock (_recognizerLock)
-			{
-				previous = _recognizer;
-				_recognizer = replacement; //American spelling for Vosk continuity is throwing me so much
-			}
-			
-			//FOUND OUT I NEED THIS, gets rid of the old recogniser outside of the lock so the audio thread never is hanging around
-			previous?.Dispose();
-			
-			CallDeferred(nameof(PrintGrammarUpdated));
 		});
 	}
 		
 
-	private void PrintGrammarUpdated() //Does as it says on the tin
+	private void PrintGrammarUpdated(string[] grammarPhrases)
 	{
-			GD.Print("Voice Manager: Recogniser of grammar updated");
+		lock (_grammarStateLock)
+		{
+			if (!_currentGrammar.SequenceEqual(grammarPhrases, StringComparer.Ordinal))
+			{
+				return;
+			}
+		}
+
+		GD.Print($"VoiceManager: Active recognizer grammar: [{string.Join(", ", grammarPhrases)}]");
+		EmitSignal(SignalName.GrammarUpdated, grammarPhrases);
+	}
+
+	private void ReportGrammarUpdateFailure(string[] grammarPhrases, string error)
+	{
+		lock (_grammarStateLock)
+		{
+			if (!_currentGrammar.SequenceEqual(grammarPhrases, StringComparer.Ordinal))
+			{
+				return;
+			}
+		}
+
+		GD.PushError($"VoiceManager: Failed to install grammar [{string.Join(", ", grammarPhrases)}]: {error}");
+		EmitSignal(SignalName.GrammarUpdateFailed, grammarPhrases, error);
 	}
 
 	public void StartListening()

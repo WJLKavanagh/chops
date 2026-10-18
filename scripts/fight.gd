@@ -55,13 +55,38 @@ func _ready() -> void:
 		var vm = get_node("/root/VoiceManager")
 		
 		# Connect using the exact PascalCase string emitted by C#
-		vm.connect("PhraseRecognised", Callable(self, "_on_phrase_recognised"))
+		if not vm.is_connected("PhraseRecognised", Callable(self, "_on_phrase_recognised")):
+			vm.connect("PhraseRecognised", Callable(self, "_on_phrase_recognised"))
 		
 		# Cast to PackedStringArray so C# marshals it correctly to string[]
-		var grammar := PackedStringArray(move_dict.keys())
-		vm.SetGrammar(grammar)
+		_configure_confirmed_move_grammar(vm)
 		
 	start_match()
+
+func _configure_confirmed_move_grammar(voice_manager: Node) -> void:
+	var peer_id := multiplayer.get_unique_id()
+	if not NetworkManager.session_data.has(peer_id):
+		push_error("Fight: No network session data for local peer %d." % peer_id)
+		return
+
+	var confirmed_names: PackedStringArray = NetworkManager.session_data[peer_id]["move_names"]
+	var move_types: Array[int] = [Move.HIGH_ATK, Move.LOW_ATK, Move.HIGH_BLK, Move.LOW_BLK, Move.SUPER]
+	if confirmed_names.size() != move_types.size():
+		push_error("Fight: Expected five confirmed move names for local peer %d, received %d." % [peer_id, confirmed_names.size()])
+		return
+
+	move_dict.clear()
+	var grammar := PackedStringArray()
+	for index in range(move_types.size()):
+		var move_name := confirmed_names[index].strip_edges().to_lower()
+		if move_name.is_empty() or move_dict.has(move_name):
+			push_error("Fight: Confirmed move names must be non-empty and unique.")
+			return
+		move_dict[move_name] = move_types[index]
+		grammar.append(move_name)
+
+	voice_manager.SetGrammar(grammar)
+	print("Fight: Local move grammar loaded: ", grammar)
 
 func start_match() -> void:
 	#Checking who is local player before grabbing everything else
@@ -153,13 +178,15 @@ func _on_phrase_recognised(phrase: String) -> void:
 		print("Ignored: Not in INPUT phase.")
 		return
 		
-	if move_dict.has(phrase):
-		if move_dict[phrase] == Move.SUPER and p1_super < super_charge_req:
+	var command := phrase.strip_edges().to_lower()
+	if move_dict.has(command):
+		var super_charge := p1_super if local_is_p1 else p2_super
+		if move_dict[command] == Move.SUPER and super_charge < super_charge_req:
 			tts.queue_text("Super not charged.", 1) #priority 1 to warn instant with tts
 			print("Super move not charged.")
 			return
 			
-		var selected_move = move_dict[phrase]
+		var selected_move = move_dict[command]
 		if local_is_p1:
 			p1_move = selected_move
 			p1_action_label.text = "Locked in!"
@@ -167,16 +194,16 @@ func _on_phrase_recognised(phrase: String) -> void:
 		else:
 			p2_move = selected_move
 			p2_action_label.text = "Locked in!"
-			
-			rpc("rpc_sync_move", multiplayer.get_unique_id(), selected_move)
+
+		rpc("rpc_sync_move", multiplayer.get_unique_id(), selected_move)
 		
 		#Audio for locked
 		tts.queue_text("Locked.", 1)
 		
-		print("Player selected: ", phrase)
+		print("Player selected: ", command)
 	else:
 		tts.queue_text("Unrecognised", 1)
-		print("Ignored: '%s' is not in move dictionary." % phrase)
+		print("Ignored: '%s' is not in move dictionary." % command)
 		
 @rpc("any_peer", "call_remote", "reliable")
 

@@ -23,6 +23,7 @@ const VOICE_COMMANDS: PackedStringArray = ["next", "previous", "lock in"]
 const MOVE_VARIATIONS_PATH := "res://Resources/MoveVariations.json"
 const MOVE_ORDER: Array[String] = ["high_attack", "low_attack", "high_block", "low_block", "super_move"]
 const MOVE_LABELS: Array[String] = ["high attack", "low attack", "high block", "low block", "super move"]
+const MOVE_ANIMATIONS: Array[String] = ["attack_high", "attack_low", "block_high", "block_low", "super_move"]
 const CONFIRMATION_PANEL_COLOR := Color(0.035, 0.055, 0.09, 0.94)
 
 @export var movementTime: float = 0.5
@@ -54,12 +55,18 @@ var _selected_move_names: PackedStringArray = PackedStringArray()
 var _move_confirmation_index: int = 0
 var _confirmation_prompt_label: Label
 var _confirmation_progress_label: Label
+var _move_grammar_ready: bool = false
+var _move_grammar_failed: bool = false
 
 func _ready() -> void:
 	randomize()
 	tts_manager.set_listening_enabled(false)
 	if not VoiceManager.PhraseRecognised.is_connected(_on_phrase_recognised):
 		VoiceManager.PhraseRecognised.connect(_on_phrase_recognised)
+	if not VoiceManager.GrammarUpdated.is_connected(_on_grammar_updated):
+		VoiceManager.GrammarUpdated.connect(_on_grammar_updated)
+	if not VoiceManager.GrammarUpdateFailed.is_connected(_on_grammar_update_failed):
+		VoiceManager.GrammarUpdateFailed.connect(_on_grammar_update_failed)
 	VoiceManager.SetGrammar(VOICE_COMMANDS)
 
 	dockList = [
@@ -148,6 +155,9 @@ func _load_idle_animations() -> void:
 
 		var looping_frames := frames.duplicate() as SpriteFrames
 		looping_frames.set_animation_loop("idle", true)
+		for animation in MOVE_ANIMATIONS:
+			if looping_frames.has_animation(animation):
+				looping_frames.set_animation_loop(animation, true)
 		_idle_animations[character_name] = looping_frames
 
 func _moveAllDocksLeft() -> void:
@@ -402,7 +412,7 @@ func _prepare_move_confirm_screen() -> void:
 	var name_label := characterDockMain.get_node("Name") as Label
 	idle_sprite.position = characterDockMain.size * 0.5
 	fallback_sprite.position = characterDockMain.size * 0.5
-	name_label.add_theme_font_size_override("font_size", 54)
+	name_label.add_theme_font_size_override("font_size", 72)
 	name_label.offset_top = -110.0
 	name_label.offset_bottom = -25.0
 
@@ -425,32 +435,32 @@ func _prepare_move_confirm_screen() -> void:
 
 	var heading := Label.new()
 	heading.text = "MOVE CONFIRMATION"
-	heading.position = Vector2(110.0, 190.0)
-	heading.size = Vector2(1000.0, 90.0)
-	heading.add_theme_font_size_override("font_size", 48)
+	heading.position = Vector2(110.0, 160.0)
+	heading.size = Vector2(1040.0, 110.0)
+	heading.add_theme_font_size_override("font_size", 62)
 	heading.add_theme_color_override("font_color", Color(0.64, 0.86, 1.0))
 	panel.add_child(heading)
 
 	_confirmation_progress_label = Label.new()
-	_confirmation_progress_label.position = Vector2(110.0, 315.0)
-	_confirmation_progress_label.size = Vector2(1000.0, 70.0)
-	_confirmation_progress_label.add_theme_font_size_override("font_size", 36)
+	_confirmation_progress_label.position = Vector2(110.0, 300.0)
+	_confirmation_progress_label.size = Vector2(1040.0, 80.0)
+	_confirmation_progress_label.add_theme_font_size_override("font_size", 48)
 	_confirmation_progress_label.add_theme_color_override("font_color", Color(0.82, 0.87, 0.94))
 	panel.add_child(_confirmation_progress_label)
 
 	_confirmation_prompt_label = Label.new()
-	_confirmation_prompt_label.position = Vector2(110.0, 430.0)
-	_confirmation_prompt_label.size = Vector2(1000.0, 260.0)
+	_confirmation_prompt_label.position = Vector2(110.0, 420.0)
+	_confirmation_prompt_label.size = Vector2(1040.0, 320.0)
 	_confirmation_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_confirmation_prompt_label.add_theme_font_size_override("font_size", 54)
+	_confirmation_prompt_label.add_theme_font_size_override("font_size", 68)
 	_confirmation_prompt_label.add_theme_color_override("font_color", Color.WHITE)
 	panel.add_child(_confirmation_prompt_label)
 
 	var instruction := Label.new()
 	instruction.text = "Say the move name to confirm it."
-	instruction.position = Vector2(110.0, 760.0)
-	instruction.size = Vector2(1000.0, 80.0)
-	instruction.add_theme_font_size_override("font_size", 34)
+	instruction.position = Vector2(110.0, 800.0)
+	instruction.size = Vector2(1040.0, 100.0)
+	instruction.add_theme_font_size_override("font_size", 44)
 	instruction.add_theme_color_override("font_color", Color(0.72, 0.78, 0.86))
 	panel.add_child(instruction)
 
@@ -459,6 +469,9 @@ func _prepare_move_confirm_screen() -> void:
 	for move_key in MOVE_ORDER:
 		var variations: Array = character_moves[move_key]
 		_selected_move_names.append(variations[randi_range(0, variations.size() - 1)].strip_edges().to_lower())
+	_move_grammar_ready = false
+	_move_grammar_failed = false
+	VoiceManager.SetGrammar(_selected_move_names)
 
 func _announce_move_confirmation() -> void:
 	if _move_confirmation_index >= MOVE_ORDER.size():
@@ -468,28 +481,52 @@ func _announce_move_confirmation() -> void:
 	var move_label: String = MOVE_LABELS[_move_confirmation_index]
 	var move_name: String = _selected_move_names[_move_confirmation_index]
 	var character_name: String = CHARACTERS[queuePointer]["name"]
+	var move_animation: String = MOVE_ANIMATIONS[_move_confirmation_index]
 	var prompt := "%s's %s is called %s, say %s to confirm." % [character_name, move_label, move_name, move_name]
 	_confirmation_progress_label.text = "Move %d of %d" % [_move_confirmation_index + 1, MOVE_ORDER.size()]
 	_confirmation_prompt_label.text = prompt
+	var idle_sprite := characterDockMain.get_node("IdleAnimation") as AnimatedSprite2D
+	if idle_sprite.sprite_frames != null and idle_sprite.sprite_frames.has_animation(move_animation):
+		idle_sprite.play(move_animation)
+	else:
+		push_warning("CharacterSelect: Animation '%s' is unavailable for %s." % [move_animation, character_name])
 	_awaiting_command = false
 	tts_manager.set_listening_enabled(false)
 	VoiceManager.StopListening()
-	VoiceManager.SetGrammar(PackedStringArray([move_name]))
 	tts_manager.queue_text(prompt, 1)
 	await tts_manager.tts_queue_finished
 
 	if not _locked_in or _move_confirmation_index >= MOVE_ORDER.size():
 		return
 
+	var grammar_timeout := get_tree().create_timer(10.0)
+	while not _move_grammar_ready and not _move_grammar_failed and grammar_timeout.time_left > 0.0:
+		await get_tree().process_frame
+	if not _move_grammar_ready:
+		_awaiting_command = false
+		_confirmation_prompt_label.text = "Speech recognition could not load the move names. Please restart the match."
+		push_error("CharacterSelect: Could not install the confirmed move names as the speech grammar.")
+		return
+
 	_awaiting_command = true
 	tts_manager.set_listening_enabled(true)
 	VoiceManager.StartListening()
+
+func _on_grammar_updated(phrases: PackedStringArray) -> void:
+	if phrases == _selected_move_names:
+		_move_grammar_ready = true
+
+func _on_grammar_update_failed(phrases: PackedStringArray, _error: String) -> void:
+	if phrases == _selected_move_names:
+		_move_grammar_failed = true
 
 func _finish_move_confirmation() -> void:
 	_awaiting_command = false
 	tts_manager.set_listening_enabled(false)
 	VoiceManager.StopListening()
-	VoiceManager.SetGrammar(_selected_move_names)
+	var idle_sprite := characterDockMain.get_node("IdleAnimation") as AnimatedSprite2D
+	if idle_sprite.sprite_frames != null and idle_sprite.sprite_frames.has_animation("idle"):
+		idle_sprite.play("idle")
 	_confirmation_progress_label.text = "All five move names confirmed."
 	_confirmation_prompt_label.text = "Waiting for the other player to finish..."
 	NetworkManager.submit_moves(_selected_move_names)
