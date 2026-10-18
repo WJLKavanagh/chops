@@ -358,7 +358,7 @@ func resolve_turn() -> void:
 		
 	check_round_end()
 
-func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool, attacker_data: FighterData) -> void:
+func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool, _attacker_data: FighterData) -> void:
 	if atk_move == Move.NONE or atk_move == Move.HIGH_BLK or atk_move == Move.LOW_BLK:
 		return
 		
