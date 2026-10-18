@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://qgojlmhd8tx"]
 
 [ext_resource type="Script" uid="uid://b87hx7fco03ti" path="res://scripts/characterSelectScripts/characterSelectionScript.gd" id="1_ofdqn"]
-[ext_resource type="Texture2D" uid="uid://bh20881rw7ajg" path="res://assets/images/lockerroom_charselect_temp.jpg" id="2_dqmbt"]
+[ext_resource type="Texture2D" uid="uid://r8s2wi1d1w6w" path="res://assets/images/lockerroom_charselect_temp.jpg" id="2_dqmbt"]
 
 [node name="CharacterSelectScene" type="Node2D" unique_id=353054802]
 script = ExtResource("1_ofdqn")
