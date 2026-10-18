@@ -87,10 +87,10 @@ public partial class VoiceManager : Node
 		else if (what == NotificationApplicationFocusOut)
 		{
 			_isFocused = false;
-			if (_isDebugBuild)
-			{
-				StopListening();
-			}
+			//if (_isDebugBuild)
+			//{
+				//StopListening();
+			//}
 		}
 	}
 

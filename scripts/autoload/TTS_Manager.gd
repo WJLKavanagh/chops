@@ -57,6 +57,7 @@ func _process(delta: float) -> void:
 
 func bind_voice_manager() -> void:
 	voice_manager = get_tree().root.get_node_or_null("VoiceManager")
+	
 
 func set_listening_enabled(enabled: bool) -> void:
 	if has_node("/root/VoiceManager"):
