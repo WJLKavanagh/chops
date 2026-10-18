@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://fqoyh0erxo71"]
 
 [ext_resource type="Script" uid="uid://lj38umgkcvj1" path="res://scripts/fight.gd" id="1_537il"]
-[ext_resource type="Texture2D" uid="uid://defufmwi01rr0" path="res://assets/FOREGROUND_03.png" id="2_htrw1"]
+[ext_resource type="Texture2D" uid="uid://ckybga2t6u2og" path="res://assets/background _04.png" id="2_htrw1"]
 
 [node name="MainFight" type="Node2D" unique_id=443347459]
 script = ExtResource("1_537il")
@@ -52,8 +52,8 @@ offset_bottom = -273.0
 metadata/_edit_use_anchors_ = true
 
 [node name="foreground" type="Sprite2D" parent="Arena" unique_id=579353374]
-position = Vector2(961.49994, 535)
-scale = Vector2(1.0140625, 1.025926)
+position = Vector2(962.49994, 541)
+scale = Vector2(1.0067708, 1.0185187)
 texture = ExtResource("2_htrw1")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1541469455]

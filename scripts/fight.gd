@@ -355,32 +355,69 @@ func evaluate_combat(atk_move: Move, def_move: Move, is_p1: bool, attacker_data:
 	else:
 		if is_p1: 
 			p2_health -= damage
-			p1_super += 1 
+			
 		else: 
 			p1_health -= damage
-			p2_super += 1
+			
 
 func check_round_end() -> void:
 	if p1_health <= 0 or p2_health <= 0:
 		current_state = State.ROUND_OVER
 		if p1_health <= 0 and p2_health <= 0:
 			print("Draw!")
+			tts.queue_text("Round Draw.")
 		elif p2_health <= 0:
 			p1_rounds += 1
 			print("Player 1 Wins Round!")
+			if local_is_p1: tts.queue_text("You won no way!!")
+			else: tts.queue_text("Your enemy won! NOOOOOOOOO!")
 		else:
 			p2_rounds += 1
 			print("Player 2 Wins Round!")
+			if local_is_p1: tts.queue_text("The opponent won, arghhh!")
+			else: tts.queue_text("You won! No wayyyyy")
+			
+		await tts.tts_queue_finished
 			
 		if p1_rounds >= 2 or p2_rounds >= 2:
 			current_state = State.MATCH_OVER
 			status_label.text = "MATCH OVER"
+			end_match()
 		else:
 			await get_tree().create_timer(3.0).timeout
 			start_round()
 	else:
 		await get_tree().create_timer(2.0).timeout
 		start_input_phase()
+
+func end_match() -> void:
+	current_state = State.MATCH_OVER
+	status_label.text = "MATCH OVER"
+	
+	#if has_node("/root/VoiceManager"):
+		#get_node("/root/VoiceManager").StopListening()
+		
+	var local_won: bool = false
+	if p1_rounds >= 2 and local_is_p1:
+		local_won = true
+	elif p2_rounds >= 2 and not local_is_p1:
+		local_won = true
+		
+#Announcing result
+	if local_won:
+		tts.queue_text("Congratulations!! You won the match!", 1)
+	else:
+		tts.queue_text("Your reign of terror is over, defeated!", 1)
+		
+	await tts.tts_queue_finished
+	
+	await get_tree().create_timer(2.0).timeout
+	
+	multiplayer.multiplayer_peer = null
+	
+	get_tree().change_scene_to_file("res://scenes/mainMenu.tscn")
+	
+
 
 func update_ui() -> void:
 	p1_hp_label.text = "HP: %d" % p1_health
