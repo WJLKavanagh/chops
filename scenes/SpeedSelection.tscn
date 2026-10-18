@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://cetsadgj3xag2"]
+
+[ext_resource type="Script" uid="uid://d0qxv1pic28rp" path="res://scripts/Speed_Selection.gd" id="2_f5hqu"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_vs068"]
+font_size = 140
+font_color = Color(0.9764706, 1, 0.078431375, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_c7uy4"]
+font_size = 80
+font_color = Color(0.06666667, 0.07058824, 0.09803922, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_qkhwq"]
+font_size = 40
+
+[node name="MainMenu" type="Node2D" unique_id=1023690726]
+
+[node name="Control" type="Control" parent="." unique_id=870777522]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("2_f5hqu")
+
+[node name="Background" type="ColorRect" parent="Control" unique_id=1861668032]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.48235294, 0, 1, 1)
+
+[node name="Title" type="Label" parent="Control" unique_id=784050250]
+layout_mode = 0
+offset_left = 509.0
+offset_top = 191.0
+offset_right = 1366.0
+offset_bottom = 383.0
+text = "Fighting Talk"
+label_settings = SubResource("LabelSettings_vs068")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TitleAgain" type="Label" parent="Control" unique_id=831079483]
+layout_mode = 0
+offset_left = 1219.0
+offset_top = 466.0
+offset_right = 1709.0
+offset_bottom = 576.0
+rotation = 3.1415927
+text = "Fighting Talk"
+label_settings = SubResource("LabelSettings_c7uy4")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StartPrompt" type="Label" parent="Control" unique_id=53747135]
+layout_mode = 0
+offset_left = 406.0
+offset_top = 743.0
+offset_right = 1322.0
+offset_bottom = 813.0
+text = "Speed Selection"
+label_settings = SubResource("LabelSettings_qkhwq")
