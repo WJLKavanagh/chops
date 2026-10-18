@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://qgojlmhd8tx"]
 
 [ext_resource type="Script" uid="uid://b87hx7fco03ti" path="res://scripts/characterSelectScripts/characterSelectionScript.gd" id="1_ofdqn"]
+[ext_resource type="Texture2D" uid="uid://bh20881rw7ajg" path="res://assets/images/lockerroom_charselect_temp.jpg" id="2_dqmbt"]
 
 [node name="CharacterSelectScene" type="Node2D" unique_id=353054802]
 script = ExtResource("1_ofdqn")
@@ -66,3 +67,10 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
+
+[node name="background" type="TextureRect" parent="." unique_id=1114234090]
+offset_left = -364.0
+offset_right = 4079.0
+offset_bottom = 1960.0
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("2_dqmbt")

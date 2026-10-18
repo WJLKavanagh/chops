@@ -11,12 +11,7 @@ const CHARACTERS: Array[Dictionary] = [
 		"texture": preload("res://assets/fighter_actions/gordon/processed/IDLE001.png")
 	},
 	{"name": "James", "texture": null},
-	{"name": "Kelly", "texture": null},
-	{"name": "Kay", "texture": null},
-	{
-		"name": "William",
-		"texture": preload("res://assets/fighters/william/1000041990.jpg")
-	}
+	{"name": "Kellie", "texture": null}
 ]
 
 const PLACEHOLDER_COLORS: Array[Color] = [
