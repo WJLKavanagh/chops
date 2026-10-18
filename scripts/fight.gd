@@ -274,6 +274,10 @@ func play_move_animation(sprite: AnimatedSprite2D, move: Move) -> void:
 			sprite.play("block_low")
 		_:
 			sprite.play("idle")
+			return
+			
+	await sprite.animation_finished
+	sprite.play("idle")
 
 func resolve_turn() -> void:
 	current_state = State.RESOLUTION
