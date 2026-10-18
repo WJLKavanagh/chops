@@ -16,7 +16,7 @@ scale = Vector2(1.0067708, 1.0185187)
 texture = ExtResource("2_htrw1")
 
 [node name="FighterLeft" type="Node2D" parent="Arena" unique_id=1322321196]
-position = Vector2(532, 560)
+position = Vector2(532, 472.15)
 
 [node name="Body" type="AnimatedSprite2D" parent="Arena/FighterLeft" unique_id=855514615]
 position = Vector2(16, -16)

@@ -184,11 +184,14 @@ func rpc_force_resolve(host_p1_move: int, host_p2_move: int) -> void:
 func _on_partial_recognised(phrase: String) -> void:
 	if current_state != State.INPUT: return
 	
-	for key in move_dict.keys():
+	var sorted_keys = move_dict.keys().duplicate()
+	sorted_keys.sort_custom(func(a, b): return a.length() > b.length())
+	
+	for key in sorted_keys:
 		if key in phrase:
-			print("Partial match found: ", key)
 			_lock_in_move(key)
 			return
+	tts.queue_text("Unrecognised", 1)
 			
 
 
@@ -198,6 +201,9 @@ func _on_phrase_recognised(phrase: String) -> void:
 	if current_state != State.INPUT:
 		print("Ignored: Not in INPUT phase.")
 		return
+	
+	var sorted_keys = move_dict.keys().duplicate()
+	sorted_keys.sort_custom(func(a, b): return a.length() > b.length())
 	
 	for key in move_dict.keys():
 		if key in phrase:
