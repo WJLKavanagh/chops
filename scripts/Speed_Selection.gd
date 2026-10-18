@@ -59,6 +59,8 @@ func on_phrase_recognised(phrase: String) -> void:
 		
 		await tts.tts_queue_finished
 		
+		get_tree().change_scene_to_file("res://scenes/mainMenu.tscn")
+		
 		#Mic back on
 		if has_node("/root/VoiceManager"):
 			get_node("/root/VoiceManager").StartListening()

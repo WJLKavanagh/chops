@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="rhymeFighter"
-run/main_scene="uid://b1xkk6v2n87a1"
+run/main_scene="uid://cetsadgj3xag2"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 

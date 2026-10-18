@@ -1,5 +1,6 @@
 extends Node
 
+
 const START_PHRASES: Array[String] = [
 	"get fighting",
 	"let me kick a man in the head",
