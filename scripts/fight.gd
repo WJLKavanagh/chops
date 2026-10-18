@@ -202,7 +202,7 @@ func _on_phrase_recognised(phrase: String) -> void:
 	for key in move_dict.keys():
 		if key in phrase:
 			_lock_in_move(key)
-		return
+			return
 		
 	tts.queue_text("Unrecognised", 1)
 
@@ -234,7 +234,7 @@ func _lock_in_move(move_key: String) -> void:
 		get_node("/root/VoiceManager").StopListening()
 	
 	
-
+@rpc("any_peer", "call_remote", "reliable")
 func rpc_sync_move(peer_id: int, move_enum: int) -> void:
 	if peer_id == 1:
 		p1_move = move_enum as Move
