@@ -196,25 +196,29 @@ func resolve_turn() -> void:
 	#else:
 	#		tts.queue_text("You used" + get_move_name(p1_move) + ".")
 	
-	#tts.queue_text("The enemy used " + get_move_name(p2_move) + ".")
+	#tts.queue_text("The enemy used " + get_move_name(p2_move) + ".") 
 	
 	var p1_dmg_taken = p1_start_hp - p1_health
 	var p2_dmg_taken = p2_start_hp - p2_health
 	var local_dmg_taken = p1_dmg_taken if local_is_p1 else p2_dmg_taken
 	var enemy_dmg_taken = p2_dmg_taken if local_is_p1 else p1_dmg_taken
+	var local_move = p1_move if local_is_p1 else p2_move
+	var enemy_move = p2_move if local_is_p1 else p1_move
+	
+	var local_health = p1_health if local_is_p1 else p2_health
 	
 	if enemy_dmg_taken > 0:
 		tts.queue_text("You hit the enemy for " + str(enemy_dmg_taken) + "damage!")
-	elif p1_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and enemy_dmg_taken == 0:
+	elif local_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and enemy_dmg_taken == 0:
 			tts.queue_text("Your attack was blocked, oh no.")
 			
 	if local_dmg_taken > 0:
-			tts.queue_text("You hit the enemy for " + str(local_dmg_taken) + " Damage!")
-	elif p2_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and local_dmg_taken == 0:
+			tts.queue_text("You were hit for " + str(local_dmg_taken) + " Damage!")
+	elif enemy_move in [Move.HIGH_ATK, Move.LOW_ATK, Move.SUPER] and local_dmg_taken == 0:
 			tts.queue_text("You blocked, well done.")
 			
 	#Health state announcement
-	if p1_health == 1:
+	if local_health == 1:
 		tts.queue_text("You have one health left")
 		
 	#Announcer narration when added to be stopped here

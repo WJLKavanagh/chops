@@ -4,7 +4,6 @@ signal tts_queue_finished
 signal tts_started
 
 var message_queue: Array[String] = []
-var is_speaking: bool = false
 var voice_id: String = ""
 var current_rate: float = 1.8 #Normal speed selected first.
 
@@ -14,6 +13,11 @@ var screen_scan_timer: Timer
 var completion_timer: Timer
 var last_spoken_text: String = ""
 var current_scene_name: String = ""
+var is_processing: bool = false
+
+#Is TTS active from other scripts
+var is_speaking: bool:
+	get: return is_processing or DisplayServer.tts_is_speaking()
 
 # a cooldown to spread out prompts
 var loop_cooldown: float = 0.0
@@ -55,11 +59,8 @@ func bind_voice_manager() -> void:
 	voice_manager = get_tree().root.get_node_or_null("VoiceManager")
 
 func set_listening_enabled(enabled: bool) -> void:
-	listening_enabled = enabled
-	if voice_manager == null:
-		bind_voice_manager()
-	if voice_manager != null and voice_manager.has_method("SetListeningEnabled"):
-		voice_manager.SetListeningEnabled(enabled)
+	if has_node("/root/VoiceManager"):
+		get_node("/root/VoiceManager").SetListeningEnabled(enabled)
 	
 
 func on_screen_scan_timeout() -> void: #Next part SHOULD stop the system getting stuck when the player loads a new level
@@ -105,14 +106,23 @@ func on_screen_scan_timeout() -> void: #Next part SHOULD stop the system getting
 		queue_text(current_screen_text, 0)
 
 func queue_text(text: String, priority: int = 0) -> void:
-	if priority == 1:
-		message_queue.clear()
+	if priority >= 1:
+		
 		DisplayServer.tts_stop()
+		message_queue.clear()
+		message_queue.append(text)
 		#completion_timer.stop()
-		is_speaking = false
+	else:
+		#Combat logs
+		message_queue.append(text)
+		
+	#Backgground loop not running so start
+	if not is_processing:
+		process_queue()
+		
 
-	message_queue.append(text)
-	process_queue()
+	
+	
 
 # func process_queue() -> void:
 # 	if is_speaking or message_queue.is_empty():
@@ -133,18 +143,27 @@ func queue_text(text: String, priority: int = 0) -> void:
 # 	completion_timer.start()
 
 func process_queue() -> void:
-	if is_speaking or message_queue.is_empty():
-		return
-
-	is_speaking = true
-	tts_started.emit()
-
-	# Mute mic while speaking
-
-
-	var text_to_speak = message_queue.pop_front()
-	DisplayServer.tts_speak(text_to_speak, voice_id, 50, 1.0, current_rate)
-#SLOW IS Speed 1, Normal 1.8, Fast 2.2, Extra Fast 2.6 Super Fast 3.2
+	is_processing = true
+	
+	while message_queue.size() > 0:
+		var next_text = message_queue.pop_front()
+		
+		DisplayServer.tts_speak(next_text, voice_id, 50, 1.0, current_rate)
+		
+		#Yielding frame so registering
+		await get_tree().process_frame
+		
+		#Hold loop here until it finishes
+		while DisplayServer.tts_is_speaking():
+			await get_tree().create_timer(0.1).timeout
+			
+	#The queue is empty so announce TTS finish
+	is_processing = false
+	tts_queue_finished.emit()
+	
+	
+	
+#SLOW IS Speed 1, Normal 1.8, Fast 2.2, Extra Fast 2.6 Super Fast 3.2, now above
 # func _on_completion_poll() -> void:
 # 	if not DisplayServer.tts_is_speaking():
 # 		completion_timer.stop()
