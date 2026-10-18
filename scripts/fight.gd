@@ -57,6 +57,11 @@ func _ready() -> void:
 		# Connect using the exact PascalCase string emitted by C#
 		if not vm.is_connected("PhraseRecognised", Callable(self, "_on_phrase_recognised")):
 			vm.connect("PhraseRecognised", Callable(self, "_on_phrase_recognised"))
+		if  not vm.PartialPhraseRecognised.is_connected(_on_partial_recognised):
+			vm.PartialPhraseRecognised.connect(_on_partial_recognised)
+			
+		var grammar:= PackedStringArray(move_dict.keys())
+		vm.SetGrammar(grammar)
 		
 		# Cast to PackedStringArray so C# marshals it correctly to string[]
 		_configure_confirmed_move_grammar(vm)
@@ -176,41 +181,59 @@ func rpc_force_resolve(host_p1_move: int, host_p2_move: int) -> void:
 	
 	resolve_turn()
 
+func _on_partial_recognised(phrase: String) -> void:
+	if current_state != State.INPUT: return
+	
+	for key in move_dict.keys():
+		if key in phrase:
+			print("Partial match found: ", key)
+			_lock_in_move(key)
+			return
+			
+
+
 func _on_phrase_recognised(phrase: String) -> void:
 	print("--- STT SIGNAL RECEIVED: '%s' ---" % phrase)
 	
 	if current_state != State.INPUT:
 		print("Ignored: Not in INPUT phase.")
 		return
+	
+	for key in move_dict.keys():
+		if key in phrase:
+			_lock_in_move(key)
+		return
 		
-	var command := phrase.strip_edges().to_lower()
-	if move_dict.has(command):
-		var super_charge := p1_super if local_is_p1 else p2_super
-		if move_dict[command] == Move.SUPER and super_charge < super_charge_req:
-			tts.queue_text("Super not charged.", 1) #priority 1 to warn instant with tts
-			print("Super move not charged.")
-			return
-			
-		var selected_move = move_dict[command]
-		if local_is_p1:
-			p1_move = selected_move
-			p1_action_label.text = "Locked in!"
-			
-		else:
-			p2_move = selected_move
-			p2_action_label.text = "Locked in!"
+	tts.queue_text("Unrecognised", 1)
 
-		rpc("rpc_sync_move", multiplayer.get_unique_id(), selected_move)
+func _lock_in_move(move_key: String) -> void:
+	#Double lock impossible for mic
+	var current_local_move = p1_move if local_is_p1 else p2_move
+	if current_local_move != Move.NONE:
+		return
 		
-		#Audio for locked
-		tts.queue_text("Locked.", 1)
+	var selected_move = move_dict[move_key]
+	var current_super = p1_super if local_is_p1 else p2_super
+	
+	if selected_move == Move.SUPER and current_super < super_charge_req:
+		tts.queue_text("Super not charged.", 1)
+		return
 		
-		print("Player selected: ", command)
+	if local_is_p1:
+		p1_move = selected_move
+		p1_action_label.text = "Locked in!"
+		
 	else:
-		tts.queue_text("Unrecognised", 1)
-		print("Ignored: '%s' is not in move dictionary." % command)
+		p2_move = selected_move
+		p2_action_label.text = "Locked in!"
 		
-@rpc("any_peer", "call_remote", "reliable")
+	rpc("rpc_sync_move", multiplayer.get_unique_id(), selected_move)
+	tts.queue_text("Locked", 1)
+	
+	if has_node("/root/VoiceManager"):
+		get_node("/root/VoiceManager").StopListening()
+	
+	
 
 func rpc_sync_move(peer_id: int, move_enum: int) -> void:
 	if peer_id == 1:
