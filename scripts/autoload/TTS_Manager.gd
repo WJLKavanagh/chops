@@ -149,7 +149,7 @@ func process_queue() -> void:
 	while message_queue.size() > 0:
 		var next_text = message_queue.pop_front()
 		
-		DisplayServer.tts_speak(next_text, voice_id, 50, 1.0, current_rate)
+		DisplayServer.tts_speak(next_text, voice_id, 150, 1.0, current_rate)
 		
 		#Yielding frame so registering
 		await get_tree().process_frame
