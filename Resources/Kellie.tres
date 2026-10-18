@@ -4,11 +4,11 @@
 
 [resource]
 script = ExtResource("1_cq4j1")
-character_name = "Kelsie"
-desc_idle = "Kelsie Stands ready to fight"
-desc_punch = "Kelsie Punches"
-desc_kick = "Kelsie Kicks"
-desc_jump = "Kelsie Jumps"
-desc_duck = "Kelsie Ducks"
-desc_super = "Kelsie Unleashes super"
+character_name = "Kellie"
+desc_idle = "Kellie Stands ready to fight"
+desc_punch = "Kellie Punches"
+desc_kick = "Kellie Kicks"
+desc_jump = "Kellie Jumps"
+desc_duck = "Kellie Ducks"
+desc_super = "Kellie Unleashes super"
 metadata/_custom_type_script = "uid://ci0nm2pnf56yb"

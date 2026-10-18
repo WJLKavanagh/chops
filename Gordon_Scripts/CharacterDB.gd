@@ -5,12 +5,9 @@ extends Node
 var roster: Dictionary = {
 	"gordon": preload("res://Resources/Gordon.tres"),
 	"cari": preload("res://Resources/Cari.tres"),
-	"william": preload("res://Resources/William.tres"),
-	"kaye": preload("res://Resources/Kaye.tres"),
 	"morgan": preload("res://Resources/Morgan.tres"),
 	"james": preload("res://Resources/James.tres"),
-	"phoebe": preload("res://Resources/Phoebe.tres"),
-	"kelsie": preload("res://Resources/Kelsie.tres"),
+	"kellie": preload("res://Resources/Kellie.tres")
 } #HAS to be lowercase for our searches, doesn't find it otherwise I've noticed.
 
 #Character select screen variables

@@ -6,6 +6,13 @@
 [node name="CharacterSelectScene" type="Node2D" unique_id=353054802]
 script = ExtResource("1_ofdqn")
 
+[node name="background" type="TextureRect" parent="." unique_id=1114234090]
+offset_left = -364.0
+offset_right = 4079.0
+offset_bottom = 1960.0
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("2_dqmbt")
+
 [node name="characterOffScreenL" type="ColorRect" parent="." unique_id=830743383]
 anchors_preset = 6
 anchor_left = 1.0
@@ -67,10 +74,3 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
 metadata/_edit_use_anchors_ = true
-
-[node name="background" type="TextureRect" parent="." unique_id=1114234090]
-offset_left = -364.0
-offset_right = 4079.0
-offset_bottom = 1960.0
-scale = Vector2(0.55, 0.55)
-texture = ExtResource("2_dqmbt")
