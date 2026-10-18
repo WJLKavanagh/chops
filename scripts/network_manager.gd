@@ -8,7 +8,7 @@ const PORT = 54321	# TODO: Confirm this port later on.
 const SUPPORTED_CHARACTERS: PackedStringArray = ["Cari", "Gordon", "Kellie", "Morgan", "James"]
 const CHARACTER_SELECT_SCENE := "res://scenes/characterSelectScene.tscn"
 const REQUIRED_MOVE_COUNT := 5
-@export var target_ip: String = "127.0.0.1" # TODO: This is set to localhost for now
+@export var target_ip: String = "192.168.1.11" # TODO: This is set to localhost for now
 
 var _peer = ENetMultiplayerPeer.new()
 var _character_select_transition_started: bool = false
