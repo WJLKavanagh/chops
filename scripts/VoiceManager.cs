@@ -223,18 +223,24 @@ public partial class VoiceManager : Node
 
 	public void StartListening()
 	{
-		if (!_listeningEnabled || (_isDebugBuild && !_isFocused))
+		if (!_listeningEnabled)
 		{
 			return;
 		}
 
 		if (_isRecording) return;
 		
+		try
+		{
 		_isRecording = true;
 		_waveIn.StartRecording();
-		//_recordingStartPlayer?.Play(); // EARCON removed because it sucks.
 		EmitSignal(SignalName.StatusChanged, true);
 		GD.Print("VoiceManager: Started listening.");
+		}
+		catch (System.InvalidOperationException e)
+		{
+			GD.PushWarning($Voice Manager: Naudio recording ignored)
+		}
 	}
 
 	public void StopListening()
