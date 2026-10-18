@@ -3,12 +3,12 @@ extends Node2D
 const CHARACTERS: Array[Dictionary] = [
 	{
 		"name": "Morgan",
-		"texture": preload("res://assets/fighter_actions/morgan/processed/IDLE001.png")
+		"texture": null
 	},
 	{"name": "Cari", "texture": null},
 	{
 		"name": "Gordon",
-		"texture": preload("res://assets/fighter_actions/gordon/processed/IDLE001.png")
+		"texture": null
 	},
 	{"name": "James", "texture": null},
 	{"name": "Kellie", "texture": null}
