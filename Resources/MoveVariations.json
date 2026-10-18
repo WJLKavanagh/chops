@@ -1,37 +1,37 @@
 {
   "Gordon": {
-	"high_attack": ["iron fist", "storm punch"],
-	"low_attack": ["sweeping kick", "ground breaker"],
-	"high_block": ["sky guard", "iron shield"],
-	"low_block": ["low stance", "stone crouch"],
-	"super_move": ["thunder rush", "final barrage"]
+	"high_attack": ["focused thrust", "braver"],
+	"low_attack": ["roundhouse", "square kick"],
+	"high_block": ["cinnamon technique", "combat roll"],
+	"low_block": ["sky defence", "icey deflect"],
+	"super_move": ["overwhelm", "discombobulate"]
   },
   "Morgan": {
-	"high_attack": ["wild strike", "hawk punch"],
-	"low_attack": ["ankle breaker", "rapid sweep"],
-	"high_block": ["eagle guard", "high shelter"],
-	"low_block": ["deep crouch", "grounded guard"],
-	"super_move": ["comet crash", "wild storm"]
+	"high_attack": ["perfect form", "crafty punch"],
+	"low_attack": ["languid lash out", "cracking kick"],
+	"high_block": ["floor protocol", "hit the deck"],
+	"low_block": ["cheeky jump", "elegant evade"],
+	"super_move": ["perfect strike", "ultimate combo"]
   },
   "Cari": {
-	"high_attack": ["bright impact", "star punch"],
-	"low_attack": ["quick sweep", "low impact"],
-	"high_block": ["radiant guard", "upper shield"],
-	"low_block": ["steady crouch", "low shelter"],
-	"super_move": ["nova burst", "starlight storm"]
+	"high_attack": ["foot flourish", "toe sandwich"],
+	"low_attack": ["floor splat", "courageous kick"],
+	"high_block": ["grave defence", "tactical flop"],
+	"low_block": ["awesome ascend", "strategic skip"],
+	"super_move": ["shoot the gun", "blow them away"]
   },
   "James": {
-	"high_attack": ["heavy swing", "steel punch"],
-	"low_attack": ["side sweep", "heavy kick"],
-	"high_block": ["solid guard", "steel wall"],
-	"low_block": ["ground hold", "side crouch"],
-	"super_move": ["maximum force", "steel cyclone"]
+	"high_attack": ["backhand slap", "the gentleman"],
+	"low_attack": ["cautious kick", "pigeon sweep"],
+	"high_block": ["professor ex", "nimble dodge"],
+	"low_block": ["powerful Pogo", "high hop"],
+	"super_move": ["homerun", "big boy beatdown"]
   },
   "Kellie": {
-	"high_attack": ["quick jab", "swift strike"],
-	"low_attack": ["flash kick", "swift sweep"],
-	"high_block": ["flash guard", "quick shield"],
-	"low_block": ["light crouch", "quick shelter"],
-	"super_move": ["flash barrage", "swift cyclone"]
+	"high_attack": ["swift jab", "lightning strike"],
+	"low_attack": ["big kick", "toe poke"],
+	"high_block": ["crimson guard", "face protect"],
+	"low_block": ["defensive hop", "stance up"],
+	"super_move": ["surprise cop", "routine shooting"]
   }
 }
