@@ -159,7 +159,7 @@ func _process(delta: float) -> void:
 			current_state = State.RESOLUTION #Timer stopped safely
 			
 			if multiplayer.is_server():
-				rpc("rpc_force_resolve")
+				rpc("rpc_force_resolve", p1_move, p2_move)
 				
 			
 		
@@ -168,7 +168,12 @@ func _process(delta: float) -> void:
 	p2_status_label.text = "HP: %d | SP: %d/%d" % [p2_health, p2_super, super_charge_req]
 	
 @rpc("authority", "call_local", "reliable")
-func rpc_force_resolve() -> void:
+func rpc_force_resolve(host_p1_move: int, host_p2_move: int) -> void:
+	
+	#Host truth
+	p1_move = host_p1_move as Move
+	p2_move = host_p2_move as Move
+	
 	resolve_turn()
 
 func _on_phrase_recognised(phrase: String) -> void:

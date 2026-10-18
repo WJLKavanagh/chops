@@ -34,7 +34,7 @@ func _ready() -> void:
 	#Main C# manager for binding
 	call_deferred("bind_voice_manager")
 
-	DisplayServer.tts_set_utterance_callback(DisplayServer.TTS_UTTERANCE_ENDED, Callable(self, "_on_tts_utterance_ended"))
+	#DisplayServer.tts_set_utterance_callback(DisplayServer.TTS_UTTERANCE_ENDED, Callable(self, "_on_tts_utterance_ended"))
 
 	#Menu and screen timer dynamic setup.
 	screen_scan_timer = Timer.new()
@@ -149,7 +149,7 @@ func process_queue() -> void:
 	while message_queue.size() > 0:
 		var next_text = message_queue.pop_front()
 		
-		DisplayServer.tts_speak(next_text, voice_id, 50, 1.0, current_rate)
+		DisplayServer.tts_speak(next_text, voice_id, 150, 1.0, current_rate)
 		
 		#Yielding frame so registering
 		await get_tree().process_frame
@@ -181,18 +181,18 @@ func process_queue() -> void:
 # 				voice_manager.StartListening()
 
 # Triggered directly by the OS when the voice finishes
-func _on_tts_utterance_ended(_utterance_id: int) -> void:
-	is_speaking = false
+#func _on_tts_utterance_ended(_utterance_id: int) -> void:
+	#is_speaking = false
 
-	if not message_queue.is_empty():
-		process_queue()
-	else:
+	#if not message_queue.is_empty():
+		#process_queue()
+	#else:
 		# Narration complete: give a 6-second window for player to speak
-		loop_cooldown = 6.0
-		tts_queue_finished.emit()
+		#loop_cooldown = 6.0
+		#tts_queue_finished.emit()
 
-		if listening_enabled and voice_manager != null and voice_manager.has_method("StartListening"):
-			voice_manager.StartListening()
+		#if listening_enabled and voice_manager != null and voice_manager.has_method("StartListening"):
+			#voice_manager.StartListening()
 
 func prompt_player_for_action(text: String = "Your turn.") -> void:
 	queue_text(text, 1)

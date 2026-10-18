@@ -19,6 +19,7 @@ scale = Vector2(8, 8)
 flip_h = true
 
 [node name="Label" type="Label" parent="Arena/FighterLeft" unique_id=810692213]
+visible = false
 offset_left = -490.0
 offset_top = -155.0
 offset_right = -450.0
