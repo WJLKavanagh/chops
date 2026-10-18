@@ -237,9 +237,9 @@ public partial class VoiceManager : Node
 		EmitSignal(SignalName.StatusChanged, true);
 		GD.Print("VoiceManager: Started listening.");
 		}
-		catch (System.InvalidOperationException e)
+		catch (System.InvalidOperationException)
 		{
-			GD.PushWarning($Voice Manager: Naudio recording ignored)
+			GD.PushWarning("Voice Manager: Naudio recording ignored");
 		}
 	}
 
