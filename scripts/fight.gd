@@ -19,6 +19,8 @@ enum State { IDLE, INPUT, RESOLUTION, ROUND_OVER, MATCH_OVER }
 @onready var p2_action_label = $Arena/FighterRight/Label
 @onready var p1_status_label = $Arena/FighterLeft/HealthAndCharge
 @onready var p2_status_label = $Arena/FighterRight/HealthAndCharge
+@onready var p1_sprite = $Arena/FighterLeft/Body
+@onready var p2_sprite = $Arena/FighterRight/Body
 
 #TTS Autoloader connection, YAY!
 @onready var tts = get_node("/root/TTS_Manager")
@@ -66,9 +68,31 @@ func start_match() -> void:
 	local_is_p1 = (multiplayer.get_unique_id() == 1)
 	p1_data = CharacterDB.get_fighter(CharacterDB.selected_p1)
 	p2_data = CharacterDB.get_fighter(CharacterDB.selected_p2)
+	
+	if p1_data == null:
+		p1_data = CharacterDB.get_fighter("morgan")
+	if p2_data == null:
+		p2_data = CharacterDB.get_fighter("cari")
 	p1_rounds = 0
 	p2_rounds = 0
 	
+	#Player 1 animations HOPEFULLY lmao
+	if p1_data:
+		var p1_name = p1_data.character_name.to_lower()
+		var p1_path = "res://assets/fighters/%s/%s_frames.tres" % [p1_name, p1_name]
+		if ResourceLoader.exists(p1_path):
+			p1_sprite.sprite_frames = load(p1_path)
+			
+			p1_sprite.play("idle")
+	if p2_data:
+		var p2_name = p2_data.character_name.to_lower()
+		var p2_path = "res://assets/fighters/%s/%s_frames.tres" % [p2_name, p2_name]
+		if ResourceLoader.exists(p2_path):
+			p2_sprite.sprite_frames = load(p2_path)
+			
+			p2_sprite.play("idle")
+		
+			
 	if p1_data and p2_data:
 		TTS_Manager.queue_text("Match Start." + p1_data.character_name + " versus " + p2_data.character_name + ".", 1)
 	TTS_Manager.queue_text("Round start, Fight!")
@@ -97,6 +121,9 @@ func start_input_phase() -> void:
 	
 	if has_node("/root/VoiceManager"):
 		get_node("/root/VoiceManager").StartListening()
+		
+	if p1_sprite.sprite_frames: p1_sprite.play("idle")
+	if p2_sprite.sprite_frames: p2_sprite.play("idle")
 
 func _process(delta: float) -> void:
 	if current_state == State.INPUT and not is_tts_prompting:
@@ -104,12 +131,20 @@ func _process(delta: float) -> void:
 		status_label.text = "Time: %.1f" % time_remaining
 		
 		if time_remaining <= 0:
-			resolve_turn()
+			current_state = State.RESOLUTION #Timer stopped safely
+			
+			if multiplayer.is_server():
+				rpc("rpc_force_resolve")
+				
+			
+		
 
 	p1_status_label.text = "HP: %d | SP: %d/%d" % [p1_health, p1_super, super_charge_req]
 	p2_status_label.text = "HP: %d | SP: %d/%d" % [p2_health, p2_super, super_charge_req]
 	
-	
+@rpc("authority", "call_local", "reliable")
+func rpc_force_resolve() -> void:
+	resolve_turn()
 
 func _on_phrase_recognised(phrase: String) -> void:
 	print("--- STT SIGNAL RECEIVED: '%s' ---" % phrase)
@@ -124,8 +159,16 @@ func _on_phrase_recognised(phrase: String) -> void:
 			print("Super move not charged.")
 			return
 			
-		p1_move = move_dict[phrase]
-		p1_action_label.text = "Locked In!"
+		var selected_move = move_dict[phrase]
+		if local_is_p1:
+			p1_move = selected_move
+			p1_action_label.text = "Locked in!"
+			
+		else:
+			p2_move = selected_move
+			p2_action_label.text = "Locked in!"
+			
+			rpc("rpc_sync_move", multiplayer.get_unique_id(), selected_move)
 		
 		#Audio for locked
 		tts.queue_text("Locked.", 1)
@@ -134,6 +177,15 @@ func _on_phrase_recognised(phrase: String) -> void:
 	else:
 		tts.queue_text("Unrecognised", 1)
 		print("Ignored: '%s' is not in move dictionary." % phrase)
+		
+@rpc("any_peer", "call_remote", "reliable")
+
+func rpc_sync_move(peer_id: int, move_enum: int) -> void:
+	if peer_id == 1:
+		p1_move = move_enum as Move
+	else:
+		p2_move = move_enum as Move
+	print("NetworkL recieved locked in from peer", peer_id)
 
 func generate_ai_move() -> Move:
 	if p2_super >= super_charge_req:
@@ -150,13 +202,30 @@ func get_move_name(move_enum: Move) -> String:
 		Move.LOW_BLK: return "Jump"
 		Move.SUPER: return "Supermove"
 	return "Unknown Move"
+	
+func play_move_animation(sprite: AnimatedSprite2D, move: Move) -> void:
+	if sprite.sprite_frames == null: return
+	
+	match move:
+		Move.HIGH_ATK:
+			sprite.play("attack_high")
+		Move.LOW_ATK:
+			sprite.play("attack_low")
+		Move.SUPER:
+			sprite.play("super_move")
+		Move.HIGH_BLK:
+			sprite.play("block_high")
+		Move.LOW_BLK:
+			sprite.play("block_low")
+		_:
+			sprite.play("idle")
 
 func resolve_turn() -> void:
 	current_state = State.RESOLUTION
 	if has_node("/root/VoiceManager"):
 		get_node("/root/VoiceManager").StopListening()
 		
-	p2_move = generate_ai_move()
+	#p2_move = generate_ai_move()
 	
 	p1_action_label.text = Move.keys()[p1_move]
 	p2_action_label.text = Move.keys()[p2_move]
@@ -178,6 +247,9 @@ func resolve_turn() -> void:
 	print("-----------------------\n")
 	
 	update_ui()
+	
+	play_move_animation(p1_sprite, p1_move)
+	play_move_animation(p2_sprite, p2_move)
 	
 	var p1_action_text = p1_data.get_move_text(p1_move)
 	var p2_action_text = p2_data.get_move_text(p2_move)

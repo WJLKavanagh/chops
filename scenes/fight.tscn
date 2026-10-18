@@ -1,9 +1,7 @@
 [gd_scene format=3 uid="uid://fqoyh0erxo71"]
 
 [ext_resource type="Script" uid="uid://lj38umgkcvj1" path="res://scripts/fight.gd" id="1_537il"]
-[ext_resource type="Texture2D" uid="uid://dug3bs7524lvq" path="res://assets/fighter_actions/gordon/processed/ATTACK_HIGH004.png" id="2_5mf5x"]
-[ext_resource type="Texture2D" uid="uid://tc80rbcy0a5l" path="res://assets/fighter_actions/morgan/processed/DODGE_HIGH002.png" id="3_qogor"]
-[ext_resource type="Texture2D" uid="uid://0t46ys4pmjex" path="res://assets/images/FOREGROUND_01.png" id="4_57w1i"]
+[ext_resource type="Texture2D" uid="uid://defufmwi01rr0" path="res://assets/FOREGROUND_03.png" id="2_htrw1"]
 
 [node name="MainFight" type="Node2D" unique_id=443347459]
 script = ExtResource("1_537il")
@@ -15,10 +13,9 @@ script = ExtResource("1_537il")
 [node name="FighterLeft" type="Node2D" parent="Arena" unique_id=1322321196]
 position = Vector2(532, 560)
 
-[node name="Body" type="Sprite2D" parent="Arena/FighterLeft" unique_id=552430169]
+[node name="Body" type="AnimatedSprite2D" parent="Arena/FighterLeft" unique_id=855514615]
 position = Vector2(16, -16)
 scale = Vector2(8, 8)
-texture = ExtResource("2_5mf5x")
 flip_h = true
 
 [node name="Label" type="Label" parent="Arena/FighterLeft" unique_id=810692213]
@@ -36,10 +33,9 @@ offset_bottom = 173.0
 [node name="FighterRight" type="Node2D" parent="Arena" unique_id=370669030]
 position = Vector2(1364, 548)
 
-[node name="Body" type="Sprite2D" parent="Arena/FighterRight" unique_id=1766844647]
+[node name="Body" type="AnimatedSprite2D" parent="Arena/FighterRight" unique_id=1294598519]
 position = Vector2(-134, -38)
 scale = Vector2(8, 8)
-texture = ExtResource("3_qogor")
 
 [node name="Label" type="Label" parent="Arena/FighterRight" unique_id=360682001]
 offset_left = -66.0
@@ -55,9 +51,9 @@ offset_bottom = -273.0
 metadata/_edit_use_anchors_ = true
 
 [node name="foreground" type="Sprite2D" parent="Arena" unique_id=579353374]
-position = Vector2(960, 540)
-scale = Vector2(2, 2)
-texture = ExtResource("4_57w1i")
+position = Vector2(961.49994, 535)
+scale = Vector2(1.0140625, 1.025926)
+texture = ExtResource("2_htrw1")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=1541469455]
 
